@@ -681,7 +681,9 @@
             </div>
         </div>
 
-        <button id="configureElectives" class="fab" style="position: fixed; right: 16px; bottom: 16px; padding: 12px 16px; border-radius: 999px; background: var(--tg-theme-button-color, #0088cc); color: var(--tg-theme-button-text-color, #fff); border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.15); font-weight: 600;">Элективы</button>
+        
+        <button id="resetProfile" class="fab" style="position: fixed; right: 16px; bottom: 72px; padding: 12px 16px; border-radius: 999px; background: var(--tg-theme-destructive-text-color, #d9534f); color: #fff; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.15); font-weight: 600;">Сброс профиля</button>
+    <button id="configureElectives" class="fab" style="position: fixed; right: 16px; bottom: 16px; padding: 12px 16px; border-radius: 999px; background: var(--tg-theme-button-color, #0088cc); color: var(--tg-theme-button-text-color, #fff); border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.15); font-weight: 600;">Элективы</button>
     
     </div>
 
@@ -920,6 +922,8 @@
 
             // Кнопки выбора элективов
             const btnConfig = document.getElementById('configureElectives');
+            const btnReset = document.getElementById('resetProfile');
+            btnReset.addEventListener('click', () => resetProfile());
             const btnCloseEl = document.getElementById('closeElectives');
             const btnCancelEl = document.getElementById('cancelElectives');
             const btnSaveEl = document.getElementById('saveElectives');
@@ -1072,6 +1076,54 @@ if (classes) {
             document.documentElement.style.setProperty('--tg-theme-text-color', '#ffffff');
             document.documentElement.style.setProperty('--tg-theme-button-color', '#3498db');
         }
-    </script>
+    
+        // --- Сброс профиля (элективы + все заметки) ---
+        async function confirmPopup(message) {
+            if (tg && tg.showPopup) {
+                return new Promise(resolve => {
+                    tg.showPopup({
+                        message,
+                        buttons: [
+                            {id: 'yes', type: 'default', text: 'Да'},
+                            {type: 'cancel'}
+                        ]
+                    }, (id) => resolve(id === 'yes'));
+                });
+            } else {
+                return Promise.resolve(confirm(message));
+            }
+        }
+
+        async function resetProfile() {
+            const ok = await confirmPopup('Сбросить выбранные элективы и все заметки? Это действие нельзя отменить.');
+            if (!ok) return;
+            try {
+                const userId = currentUser.id;
+                const keys = await cs.getKeys();
+                const toDelete = keys.filter(k => k.startsWith(`note:${userId}:`) || k === `electives:${userId}`);
+                for (const k of toDelete) {
+                    await cs.removeItem(k);
+                }
+                // Очистить локальное состояние
+                selectedElectives = new Set();
+                notesManager.notes = {};
+                notesManager.updateNotesDisplay();
+                
+                if (tg && tg.showPopup) {
+                    tg.showPopup({ message: 'Профиль сброшен.' });
+                } else {
+                    alert('Профиль сброшен.');
+                }
+                // Предложить заново выбрать элективы
+                showElectivesModal();
+            } catch (e) {
+                if (tg && tg.showPopup) {
+                    tg.showPopup({ message: 'Ошибка при сбросе профиля: ' + (e?.message || e) });
+                } else {
+                    alert('Ошибка при сбросе профиля: ' + (e?.message || e));
+                }
+            }
+        }
+</script>
 </body>
 </html>
