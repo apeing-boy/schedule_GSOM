@@ -694,7 +694,6 @@
                 currentUser = tg.initDataUnsafe.user;
                 displayUserInfo(currentUser);
             } else {
-                // Fallback для отладки в браузере
                 const store = window.localStorage;
                 cs = {
                     getKeys: async () => Object.keys(store),
@@ -812,7 +811,7 @@
                 selectedElectives.clear();
                 notesManager.notes = {};
                 notesManager.updateNotesDisplay();
-                updateCalendarAppearance(); // Обновляем календарь после сброса
+                updateCalendarAppearance();
                 if (tg?.showPopup) tg.showPopup({ message: 'Профиль сброшен.' });
                 else alert('Профиль сброшен.');
                 showElectivesModal();
@@ -843,7 +842,7 @@
 
         function updateSummaryStatistics() {
             const classDaysCount = document.querySelectorAll('.day.busy, .day.online-only').length;
-            const freeDaysCount = document.querySelectorAll('.calendar-grid .day.free').length; // Считаем только дни в сетке
+            const freeDaysCount = document.querySelectorAll('.calendar-grid .day.free').length;
             document.getElementById('classDaysCount').textContent = classDaysCount;
             document.getElementById('freeDaysCount').textContent = freeDaysCount;
         }
@@ -857,22 +856,34 @@
         }
 
         function setupEventListeners() {
+            // Привязываем обработчики к статичным элементам
             document.getElementById('configureElectives').addEventListener('click', showElectivesModal);
             document.getElementById('resetProfile').addEventListener('click', resetProfile);
-            document.getElementById('closeElectives').addEventListener('click', hideElectivesModal);
-            document.getElementById('cancelElectives').addEventListener('click', hideElectivesModal);
+
+            // Используем делегирование событий для модальных окон
+            const classModal = document.getElementById('classModal');
+            classModal.addEventListener('click', (event) => {
+                if (event.target.classList.contains('close')) {
+                    classModal.style.display = 'none';
+                }
+            });
             
-            document.getElementById('saveElectives').addEventListener('click', async () => {
-                readElectivesFromUI();
-                await saveElectivesToCloud();
-                hideElectivesModal();
-                updateCalendarAppearance(); // <-- ГЛАВНОЕ ИСПРАВЛЕНИЕ
+            const electivesModal = document.getElementById('electivesModal');
+            electivesModal.addEventListener('click', async (event) => {
+                const target = event.target;
+                if (target.id === 'saveElectives') {
+                    readElectivesFromUI();
+                    await saveElectivesToCloud();
+                    hideElectivesModal();
+                    updateCalendarAppearance(); // Обновляем UI
+                } else if (target.id === 'cancelElectives' || target.id === 'closeElectives') {
+                    hideElectivesModal();
+                }
             });
 
-            const classModal = document.getElementById('classModal');
-            classModal.querySelector('.close').addEventListener('click', () => { classModal.style.display = 'none'; });
             window.addEventListener('click', (event) => {
                 if (event.target === classModal) classModal.style.display = 'none';
+                if (event.target === electivesModal) hideElectivesModal();
             });
 
             document.querySelectorAll('.day.busy[data-date], .day.online-only[data-date]').forEach(day => {
@@ -914,7 +925,7 @@
                             </div>`;
                         }).join('');
                     } else {
-                        modalBody.innerHTML = `<div style="padding:16px;">На этот день у вас нет занятий из выбранных элективов.<br/><br/><button class="btn" onclick="showElectivesModal()">Выбрать элективы</button></div>`;
+                        modalBody.innerHTML = `<div style="padding:16px;">На этот день у вас нет занятий.<br/><br/><button class="btn" onclick="showElectivesModal()">Выбрать элективы</button></div>`;
                     }
                     
                     classModal.style.display = 'block';
