@@ -11,7 +11,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: var(--tg-theme-bg-color, #f5f7fa);
@@ -20,7 +20,7 @@
             margin: 0;
             padding-bottom: 140px; /* Добавлен отступ для FAB кнопок */
         }
-        
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -29,7 +29,7 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             padding: 20px;
         }
-        
+
         .user-info {
             display: flex;
             align-items: center;
@@ -39,7 +39,7 @@
             background: var(--tg-theme-section-bg-color, #f8f9fa);
             border-radius: 8px;
         }
-        
+
         .user-avatar {
             width: 40px;
             height: 40px;
@@ -51,14 +51,14 @@
             color: white;
             font-weight: bold;
         }
-        
+
         h1 {
             text-align: center;
             color: var(--tg-theme-text-color, #2c3e50);
             margin-bottom: 10px;
             font-size: 2em;
         }
-        
+
         .legend {
             display: flex;
             justify-content: center;
@@ -69,7 +69,7 @@
             border-radius: 8px;
             flex-wrap: wrap;
         }
-        
+
         .legend-item {
             display: flex;
             align-items: center;
@@ -77,31 +77,31 @@
             font-weight: 500;
             font-size: 0.85em;
         }
-        
+
         .legend-color {
             width: 16px;
             height: 16px;
             border-radius: 4px;
         }
-        
+
         .free { background: #27ae60; }
         .busy { background: #e74c3c; }
         .weekend { background: #95a5a6; }
         .holiday { background: #00ff00; }
         .online-only { background: #ff8c00; }
-        
+
         .months-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
         }
-        
+
         .month {
             border: 2px solid var(--tg-theme-section-separator-color, #ecf0f1);
             border-radius: 12px;
             overflow: hidden;
         }
-        
+
         .month-header {
             background: var(--tg-theme-button-color, #3498db);
             color: var(--tg-theme-button-text-color, white);
@@ -110,12 +110,12 @@
             font-size: 1.2em;
             font-weight: 600;
         }
-        
+
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
         }
-        
+
         .day-header {
             background: var(--tg-theme-section-bg-color, #34495e);
             color: var(--tg-theme-text-color, white);
@@ -124,7 +124,7 @@
             font-size: 0.7em;
             font-weight: 600;
         }
-        
+
         .day {
             aspect-ratio: 1;
             display: flex;
@@ -134,21 +134,21 @@
             font-weight: 600;
             position: relative;
             cursor: default;
-            transition: background-color 0.2s ease;
+            transition: all 0.2s ease;
             font-size: 0.9em;
         }
-        
+
         .day:active {
             transform: scale(0.95);
         }
-        
+
         .day.free { background: #2ecc71; color: white; }
         .day.busy { background: #e74c3c; color: white; cursor: pointer; }
         .day.online-only { background: #ff8c00; color: white; cursor: pointer; }
         .day.weekend { background: #95a5a6; color: white; }
         .day.holiday { background: #00ff00; color: white; font-weight: bold; }
         .day.other-month { background: #ecf0f1; color: #bdc3c7; }
-        
+
         .day.has-note::after {
             content: '📝';
             position: absolute;
@@ -156,7 +156,7 @@
             right: 2px;
             font-size: 0.6em;
         }
-        
+
         /* Модальное окно */
         .modal {
             display: none;
@@ -168,7 +168,7 @@
             height: 100%;
             background-color: rgba(0,0,0,0.5);
         }
-        
+
         .modal-content {
             background-color: var(--tg-theme-bg-color, white);
             margin: 5% auto;
@@ -181,12 +181,12 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             animation: modalAppear 0.3s ease;
         }
-        
+
         @keyframes modalAppear {
             from { opacity: 0; transform: translateY(-50px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
+
         .modal-header {
             background: var(--tg-theme-button-color, #3498db);
             color: var(--tg-theme-button-text-color, white);
@@ -196,12 +196,12 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .modal-title {
             font-size: 1.1em;
             font-weight: 600;
         }
-        
+
         .close {
             color: var(--tg-theme-button-text-color, white);
             font-size: 20px;
@@ -209,11 +209,11 @@
             cursor: pointer;
             padding: 5px;
         }
-        
+
         .modal-body {
             padding: 15px;
         }
-        
+
         .class-item {
             padding: 12px;
             margin-bottom: 12px;
@@ -222,31 +222,31 @@
             border-radius: 0 8px 8px 0;
             position: relative;
         }
-        
+
         .class-item:last-child {
             margin-bottom: 0;
         }
-        
+
         .class-time {
             font-weight: bold;
             color: var(--tg-theme-text-color, #2c3e50);
             font-size: 1em;
             margin-bottom: 5px;
         }
-        
+
         .class-name {
             color: var(--tg-theme-text-color, #34495e);
             margin-bottom: 8px;
             font-weight: 600;
             font-size: 0.95em;
         }
-        
+
         .class-teacher {
             color: var(--tg-theme-hint-color, #7f8c8d);
             font-size: 0.85em;
             margin-bottom: 8px;
         }
-        
+
         .class-format {
             font-size: 0.75em;
             padding: 3px 8px;
@@ -255,29 +255,29 @@
             display: inline-block;
             margin-bottom: 10px;
         }
-        
+
         .format-online { background: #ffeaa7; color: #d63031; }
         .format-offline { background: #d1f2eb; color: #00b894; }
-        
+
         .note-section {
             margin-top: 10px;
             padding-top: 10px;
             border-top: 1px solid var(--tg-theme-section-separator-color, #eee);
         }
-        
+
         .note-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 8px;
         }
-        
+
         .note-label {
             font-weight: 600;
             color: var(--tg-theme-text-color, #333);
             font-size: 0.9em;
         }
-        
+
         .note-btn {
             background: var(--tg-theme-button-color, #3498db);
             color: var(--tg-theme-button-text-color, white);
@@ -287,7 +287,7 @@
             font-size: 0.75em;
             cursor: pointer;
         }
-        
+
         .note-text {
             background: var(--tg-theme-bg-color, white);
             border: 1px solid var(--tg-theme-section-separator-color, #ddd);
@@ -300,7 +300,7 @@
             resize: vertical;
             width: 100%;
         }
-        
+
         .note-display {
             background: var(--tg-theme-section-bg-color, #f9f9f9);
             border-radius: 6px;
@@ -311,20 +311,20 @@
             white-space: pre-wrap;
             word-wrap: break-word;
         }
-        
+
         .note-char-count {
             font-size: 0.7em;
             color: var(--tg-theme-hint-color, #666);
             text-align: right;
             margin-top: 4px;
         }
-        
+
         .note-actions {
             display: flex;
             gap: 8px;
             margin-top: 8px;
         }
-        
+
         .btn {
             background: var(--tg-theme-button-color, #3498db);
             color: var(--tg-theme-button-text-color, white);
@@ -335,12 +335,12 @@
             cursor: pointer;
             flex: 1;
         }
-        
+
         .btn-secondary {
             background: var(--tg-theme-section-bg-color, #6c757d);
             color: var(--tg-theme-text-color, white);
         }
-        
+
         .summary {
             margin-top: 20px;
             padding: 15px;
@@ -348,19 +348,19 @@
             border-radius: 10px;
             border-left: 5px solid var(--tg-theme-button-color, #3498db);
         }
-        
+
         .summary h3 {
             color: var(--tg-theme-text-color, #2c3e50);
             margin-bottom: 10px;
             font-size: 1.1em;
         }
-        
+
         .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             gap: 10px;
         }
-        
+
         .stat {
             text-align: center;
             padding: 12px;
@@ -368,19 +368,20 @@
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        
+
         .stat-number {
             font-size: 1.5em;
             font-weight: bold;
             color: var(--tg-theme-button-color, #27ae60);
         }
-        
+
         .stat-label {
             color: var(--tg-theme-hint-color, #7f8c8d);
             margin-top: 5px;
             font-size: 0.8em;
         }
-        
+
+        /* FAB кнопки - улучшенное позиционирование */
         .fab-container {
             position: fixed;
             right: 16px;
@@ -390,7 +391,7 @@
             gap: 12px;
             z-index: 999;
         }
-        
+
         .fab {
             padding: 12px 16px;
             border-radius: 999px;
@@ -402,47 +403,47 @@
             font-weight: 600;
             transition: transform 0.2s ease;
         }
-        
+
         .fab:active {
             transform: scale(0.95);
         }
-        
+
         .fab.danger {
             background: var(--tg-theme-destructive-text-color, #d9534f);
         }
-        
-        #electivesModal { 
-            display: none; 
-            position: fixed; 
-            z-index: 2000; 
-            inset: 0; 
-            background: rgba(0,0,0,.4); 
+
+        #electivesModal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            inset: 0;
+            background: rgba(0,0,0,.4);
         }
-        
-        #electivesModal .modal-content { 
-            background: var(--tg-theme-bg-color, #fff); 
-            margin: 5% auto; 
-            padding: 16px; 
-            border-radius: 12px; 
-            width: min(560px, 92%); 
+
+        #electivesModal .modal-content {
+            background: var(--tg-theme-bg-color, #fff);
+            margin: 5% auto;
+            padding: 16px;
+            border-radius: 12px;
+            width: min(560px, 92%);
         }
-        
-        .electives-list { 
-            display: grid; 
-            gap: 8px; 
-            margin: 12px 0; 
+
+        .electives-list {
+            display: grid;
+            gap: 8px;
+            margin: 12px 0;
         }
-        
-        .electives-actions { 
-            display: flex; 
-            gap: 8px; 
-            justify-content: flex-end; 
-            margin-top: 12px; 
+
+        .electives-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 12px;
         }
-        
+
         @media (max-width: 768px) {
-            body { 
-                padding: 10px; 
+            body {
+                padding: 10px;
                 padding-bottom: 140px;
             }
             .container { padding: 15px; }
@@ -463,93 +464,313 @@
                 <div style="font-size: 0.8em; color: var(--tg-theme-hint-color, #666);" id="userUsername"></div>
             </div>
         </div>
-        
+
         <h1>Расписание занятий</h1>
         <p style="text-align: center; color: var(--tg-theme-hint-color, #666); margin-bottom: 20px;">3 семестр • Сентябрь-Декабрь 2025</p>
-        
+
         <div class="legend">
-            <div class="legend-item"><div class="legend-color free"></div><span>Свободные дни</span></div>
-            <div class="legend-item"><div class="legend-color busy"></div><span>Дни с занятиями</span></div>
-            <div class="legend-item"><div class="legend-color online-only"></div><span>Только онлайн</span></div>
-            <div class="legend-item"><div class="legend-color weekend"></div><span>Выходные</span></div>
-            <div class="legend-item"><div class="legend-color holiday"></div><span>Праздники РФ</span></div>
+            <div class="legend-item">
+                <div class="legend-color free"></div>
+                <span>Свободные дни</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color busy"></div>
+                <span>Дни с занятиями</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color online-only"></div>
+                <span>Только онлайн</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color weekend"></div>
+                <span>Выходные</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color holiday"></div>
+                <span>Праздники РФ</span>
+            </div>
         </div>
-        
+
         <div class="months-grid">
-            <!-- Сентябрь 2025 -->
             <div class="month">
                 <div class="month-header">Сентябрь 2025</div>
                 <div class="calendar-grid">
-                    <div class="day-header">Пн</div><div class="day-header">Вт</div><div class="day-header">Ср</div><div class="day-header">Чт</div><div class="day-header">Пт</div><div class="day-header">Сб</div><div class="day-header">Вс</div>
-                    <div class="day free">1</div><div class="day free">2</div><div class="day free">3</div><div class="day free">4</div><div class="day free">5</div><div class="day weekend">6</div><div class="day weekend">7</div>
-                    <div class="day free">8</div><div class="day free">9</div><div class="day busy" data-date="2025-09-10">10</div><div class="day free">11</div><div class="day busy" data-date="2025-09-12">12</div><div class="day busy" data-date="2025-09-13">13</div><div class="day weekend">14</div>
-                    <div class="day online-only" data-date="2025-09-15">15</div><div class="day free">16</div><div class="day busy" data-date="2025-09-17">17</div><div class="day free">18</div><div class="day free">19</div><div class="day busy" data-date="2025-09-20">20</div><div class="day weekend">21</div>
-                    <div class="day busy" data-date="2025-09-22">22</div><div class="day free">23</div><div class="day busy" data-date="2025-09-24">24</div><div class="day busy" data-date="2025-09-25">25</div><div class="day busy" data-date="2025-09-26">26</div><div class="day busy" data-date="2025-09-27">27</div><div class="day weekend">28</div>
-                    <div class="day free">29</div><div class="day free">30</div>
+                    <div class="day-header">Пн</div>
+                    <div class="day-header">Вт</div>
+                    <div class="day-header">Ср</div>
+                    <div class="day-header">Чт</div>
+                    <div class="day-header">Пт</div>
+                    <div class="day-header">Сб</div>
+                    <div class="day-header">Вс</div>
+                    <div class="day free">1</div>
+                    <div class="day free">2</div>
+                    <div class="day free">3</div>
+                    <div class="day free">4</div>
+                    <div class="day free">5</div>
+                    <div class="day weekend">6</div>
+                    <div class="day weekend">7</div>
+                    <div class="day free">8</div>
+                    <div class="day free">9</div>
+                    <div class="day busy" data-date="2025-09-10">10</div>
+                    <div class="day free">11</div>
+                    <div class="day busy" data-date="2025-09-12">12</div>
+                    <div class="day busy" data-date="2025-09-13">13</div>
+                    <div class="day weekend">14</div>
+                    <div class="day online-only" data-date="2025-09-15">15</div>
+                    <div class="day free">16</div>
+                    <div class="day busy" data-date="2025-09-17">17</div>
+                    <div class="day free">18</div>
+                    <div class="day free">19</div>
+                    <div class="day busy" data-date="2025-09-20">20</div>
+                    <div class="day weekend">21</div>
+                    <div class="day busy" data-date="2025-09-22">22</div>
+                    <div class="day free">23</div>
+                    <div class="day busy" data-date="2025-09-24">24</div>
+                    <div class="day busy" data-date="2025-09-25">25</div>
+                    <div class="day busy" data-date="2025-09-26">26</div>
+                    <div class="day busy" data-date="2025-09-27">27</div>
+                    <div class="day weekend">28</div>
+                    <div class="day free">29</div>
+                    <div class="day free">30</div>
                 </div>
             </div>
-            <!-- Октябрь 2025 -->
+
             <div class="month">
                 <div class="month-header">Октябрь 2025</div>
                 <div class="calendar-grid">
-                    <div class="day-header">Пн</div><div class="day-header">Вт</div><div class="day-header">Ср</div><div class="day-header">Чт</div><div class="day-header">Пт</div><div class="day-header">Сб</div><div class="day-header">Вс</div>
-                    <div class="day other-month">29</div><div class="day other-month">30</div><div class="day busy" data-date="2025-10-01">1</div><div class="day online-only" data-date="2025-10-02">2</div><div class="day free">3</div><div class="day busy" data-date="2025-10-04">4</div><div class="day weekend">5</div>
-                    <div class="day free">6</div><div class="day free">7</div><div class="day busy" data-date="2025-10-08">8</div><div class="day busy" data-date="2025-10-09">9</div><div class="day busy" data-date="2025-10-10">10</div><div class="day busy" data-date="2025-10-11">11</div><div class="day weekend">12</div>
-                    <div class="day busy" data-date="2025-10-13">13</div><div class="day free">14</div><div class="day free">15</div><div class="day free">16</div><div class="day free">17</div><div class="day busy" data-date="2025-10-18">18</div><div class="day weekend">19</div>
-                    <div class="day free">20</div><div class="day free">21</div><div class="day free">22</div><div class="day free">23</div><div class="day online-only" data-date="2025-10-24">24</div><div class="day busy" data-date="2025-10-25">25</div><div class="day weekend">26</div>
-                    <div class="day busy" data-date="2025-10-27">27</div><div class="day free">28</div><div class="day free">29</div><div class="day free">30</div><div class="day busy" data-date="2025-10-31">31</div>
+                    <div class="day-header">Пн</div>
+                    <div class="day-header">Вт</div>
+                    <div class="day-header">Ср</div>
+                    <div class="day-header">Чт</div>
+                    <div class="day-header">Пт</div>
+                    <div class="day-header">Сб</div>
+                    <div class="day-header">Вс</div>
+                    <div class="day other-month">29</div>
+                    <div class="day other-month">30</div>
+                    <div class="day busy" data-date="2025-10-01">1</div>
+                    <div class="day online-only" data-date="2025-10-02">2</div>
+                    <div class="day free">3</div>
+                    <div class="day busy" data-date="2025-10-04">4</div>
+                    <div class="day weekend">5</div>
+                    <div class="day free">6</div>
+                    <div class="day free">7</div>
+                    <div class="day busy" data-date="2025-10-08">8</div>
+                    <div class="day busy" data-date="2025-10-09">9</div>
+                    <div class="day busy" data-date="2025-10-10">10</div>
+                    <div class="day busy" data-date="2025-10-11">11</div>
+                    <div class="day weekend">12</div>
+                    <div class="day busy" data-date="2025-10-13">13</div>
+                    <div class="day free">14</div>
+                    <div class="day free">15</div>
+                    <div class="day free">16</div>
+                    <div class="day free">17</div>
+                    <div class="day busy" data-date="2025-10-18">18</div>
+                    <div class="day weekend">19</div>
+                    <div class="day free">20</div>
+                    <div class="day free">21</div>
+                    <div class="day free">22</div>
+                    <div class="day free">23</div>
+                    <div class="day online-only" data-date="2025-10-24">24</div>
+                    <div class="day busy" data-date="2025-10-25">25</div>
+                    <div class="day weekend">26</div>
+                    <div class="day busy" data-date="2025-10-27">27</div>
+                    <div class="day free">28</div>
+                    <div class="day free">29</div>
+                    <div class="day free">30</div>
+                    <div class="day busy" data-date="2025-10-31">31</div>
                 </div>
             </div>
-            <!-- Ноябрь 2025 -->
+
             <div class="month">
                 <div class="month-header">Ноябрь 2025</div>
                 <div class="calendar-grid">
-                    <div class="day-header">Пн</div><div class="day-header">Вт</div><div class="day-header">Ср</div><div class="day-header">Чт</div><div class="day-header">Пт</div><div class="day-header">Сб</div><div class="day-header">Вс</div>
-                    <div class="day other-month">27</div><div class="day other-month">28</div><div class="day other-month">29</div><div class="day other-month">30</div><div class="day other-month">31</div><div class="day busy" data-date="2025-11-01">1</div><div class="day weekend">2</div>
-                    <div class="day holiday">3</div><div class="day holiday">4</div><div class="day free">5</div><div class="day free">6</div><div class="day busy" data-date="2025-11-07">7</div><div class="day busy" data-date="2025-11-08">8</div><div class="day weekend">9</div>
-                    <div class="day free">10</div><div class="day free">11</div><div class="day free">12</div><div class="day free">13</div><div class="day free">14</div><div class="day busy" data-date="2025-11-15">15</div><div class="day weekend">16</div>
-                    <div class="day busy" data-date="2025-11-17">17</div><div class="day free">18</div><div class="day free">19</div><div class="day free">20</div><div class="day free">21</div><div class="day busy" data-date="2025-11-22">22</div><div class="day weekend">23</div>
-                    <div class="day free">24</div><div class="day online-only" data-date="2025-11-25">25</div><div class="day free">26</div><div class="day free">27</div><div class="day busy" data-date="2025-11-28">28</div><div class="day busy" data-date="2025-11-29">29</div><div class="day weekend">30</div>
+                    <div class="day-header">Пн</div>
+                    <div class="day-header">Вт</div>
+                    <div class="day-header">Ср</div>
+                    <div class="day-header">Чт</div>
+                    <div class="day-header">Пт</div>
+                    <div class="day-header">Сб</div>
+                    <div class="day-header">Вс</div>
+                    <div class="day other-month">27</div>
+                    <div class="day other-month">28</div>
+                    <div class="day other-month">29</div>
+                    <div class="day other-month">30</div>
+                    <div class="day other-month">31</div>
+                    <div class="day busy" data-date="2025-11-01">1</div>
+                    <div class="day weekend">2</div>
+                    <div class="day holiday">3</div>
+                    <div class="day holiday">4</div>
+                    <div class="day free">5</div>
+                    <div class="day free">6</div>
+                    <div class="day busy" data-date="2025-11-07">7</div>
+                    <div class="day busy" data-date="2025-11-08">8</div>
+                    <div class="day weekend">9</div>
+                    <div class="day free">10</div>
+                    <div class="day free">11</div>
+                    <div class="day free">12</div>
+                    <div class="day free">13</div>
+                    <div class="day free">14</div>
+                    <div class="day busy" data-date="2025-11-15">15</div>
+                    <div class="day weekend">16</div>
+                    <div class="day busy" data-date="2025-11-17">17</div>
+                    <div class="day free">18</div>
+                    <div class="day free">19</div>
+                    <div class="day free">20</div>
+                    <div class="day free">21</div>
+                    <div class="day busy" data-date="2025-11-22">22</div>
+                    <div class="day weekend">23</div>
+                    <div class="day free">24</div>
+                    <div class="day online-only" data-date="2025-11-25">25</div>
+                    <div class="day free">26</div>
+                    <div class="day free">27</div>
+                    <div class="day busy" data-date="2025-11-28">28</div>
+                    <div class="day busy" data-date="2025-11-29">29</div>
+                    <div class="day weekend">30</div>
                 </div>
             </div>
-            <!-- Декабрь 2025 -->
+
             <div class="month">
                 <div class="month-header">Декабрь 2025</div>
                 <div class="calendar-grid">
-                    <div class="day-header">Пн</div><div class="day-header">Вт</div><div class="day-header">Ср</div><div class="day-header">Чт</div><div class="day-header">Пт</div><div class="day-header">Сб</div><div class="day-header">Вс</div>
-                    <div class="day busy" data-date="2025-12-01">1</div><div class="day online-only" data-date="2025-12-02">2</div><div class="day free">3</div><div class="day free">4</div><div class="day free">5</div><div class="day busy" data-date="2025-12-06">6</div><div class="day weekend">7</div>
-                    <div class="day free">8</div><div class="day online-only" data-date="2025-12-09">9</div><div class="day free">10</div><div class="day free">11</div><div class="day free">12</div><div class="day busy" data-date="2025-12-13">13</div><div class="day weekend">14</div>
-                    <div class="day busy" data-date="2025-12-15">15</div><div class="day online-only" data-date="2025-12-16">16</div><div class="day free">17</div><div class="day busy" data-date="2025-12-18">18</div><div class="day free">19</div><div class="day busy" data-date="2025-12-20">20</div><div class="day weekend">21</div>
-                    <div class="day weekend">22</div><div class="day free">23</div><div class="day free">24</div><div class="day free">25</div><div class="day free">26</div><div class="day weekend">27</div><div class="day weekend">28</div>
-                    <div class="day weekend">29</div><div class="day weekend">30</div><div class="day holiday">31</div>
+                    <div class="day-header">Пн</div>
+                    <div class="day-header">Вт</div>
+                    <div class="day-header">Ср</div>
+                    <div class="day-header">Чт</div>
+                    <div class="day-header">Пт</div>
+                    <div class="day-header">Сб</div>
+                    <div class="day-header">Вс</div>
+                    <div class="day busy" data-date="2025-12-01">1</div>
+                    <div class="day online-only" data-date="2025-12-02">2</div>
+                    <div class="day free">3</div>
+                    <div class="day free">4</div>
+                    <div class="day free">5</div>
+                    <div class="day busy" data-date="2025-12-06">6</div>
+                    <div class="day weekend">7</div>
+                    <div class="day free">8</div>
+                    <div class="day online-only" data-date="2025-12-09">9</div>
+                    <div class="day free">10</div>
+                    <div class="day free">11</div>
+                    <div class="day free">12</div>
+                    <div class="day busy" data-date="2025-12-13">13</div>
+                    <div class="day weekend">14</div>
+                    <div class="day busy" data-date="2025-12-15">15</div>
+                    <div class="day online-only" data-date="2025-12-16">16</div>
+                    <div class="day free">17</div>
+                    <div class="day busy" data-date="2025-12-18">18</div>
+                    <div class="day free">19</div>
+                    <div class="day busy" data-date="2025-12-20">20</div>
+                    <div class="day weekend">21</div>
+                    <div class="day weekend">22</div>
+                    <div class="day free">23</div>
+                    <div class="day free">24</div>
+                    <div class="day free">25</div>
+                    <div class="day free">26</div>
+                    <div class="day weekend">27</div>
+                    <div class="day weekend">28</div>
+                    <div class="day weekend">29</div>
+                    <div class="day weekend">30</div>
+                    <div class="day holiday">31</div>
                 </div>
             </div>
         </div>
-        
+
         <div class="summary">
-            <h3>📊 Статистика</h3>
+            <h3>📊 Статистика свободного времени</h3>
             <div class="stats">
-                <div class="stat"><div class="stat-number" id="freeDaysCount">0</div><div class="stat-label">Свободных дней</div></div>
-                <div class="stat"><div class="stat-number" id="classDaysCount">0</div><div class="stat-label">Дней с занятиями</div></div>
-                <div class="stat"><div class="stat-number">40</div><div class="stat-label">Выходных</div></div>
-                <div class="stat"><div class="stat-number" id="notesCount">0</div><div class="stat-label">Заметок</div></div>
+                <div class="stat">
+                    <div class="stat-number">47</div>
+                    <div class="stat-label">Свободных дней</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">35</div>
+                    <div class="stat-label">Дней с занятиями</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">40</div>
+                    <div class="stat-label">Выходных дней</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number" id="notesCount">0</div>
+                    <div class="stat-label">Заметок</div>
+                </div>
             </div>
         </div>
     </div>
-    
-    <div id="classModal" class="modal"><div class="modal-content"><div class="modal-header"><span class="modal-title" id="modalTitle">Занятия</span><span class="close">&times;</span></div><div class="modal-body" id="modalBody"></div></div></div>
-    <div id="electivesModal" class="modal"><div class="modal-content"><span class="close" id="closeElectives" style="float:right;font-size:28px;cursor:pointer">&times;</span><h2 style="margin:0 0 8px 0;">Выберите свои элективы</h2><div class="electives-list" id="electivesList"></div><div class="electives-actions"><button class="btn btn-secondary" id="cancelElectives">Отмена</button><button class="btn" id="saveElectives">Сохранить</button></div></div></div>
-    <div class="fab-container"><button id="resetProfile" class="fab danger">Сброс профиля</button><button id="configureElectives" class="fab">Элективы</button></div>
+
+    <div id="classModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title" id="modalTitle">Занятия</span>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="modalBody">
+                </div>
+        </div>
+    </div>
+
+    <div id="electivesModal">
+        <div class="modal-content">
+            <span class="close" id="closeElectives" style="float:right;font-size:28px;cursor:pointer">&times;</span>
+            <h2 style="margin:0 0 8px 0;">Выберите свои элективные дисциплины</h2>
+            <div class="electives-list" id="electivesList"></div>
+            <div class="electives-actions">
+                <button class="btn btn-secondary" id="cancelElectives">Отмена</button>
+                <button class="btn" id="saveElectives">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="fab-container">
+        <button id="resetProfile" class="fab danger">Сброс профиля</button>
+        <button id="configureElectives" class="fab">Элективы</button>
+    </div>
 
     <script>
-        // --- ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ---
         const tg = window.Telegram?.WebApp || null;
         let currentUser = null;
         let notesManager = null;
         let selectedElectives = new Set();
-        let cs = null; // CloudStorage или LocalStorage
+        let cs = null; // Глобальная переменная для CloudStorage
 
-        // --- ДАННЫЕ И КОНСТАНТЫ ---
+        if (tg) {
+            tg.ready();
+            tg.expand();
+
+            if (!tg.initDataUnsafe?.user) {
+                document.body.innerHTML = '<div style="padding:24px;font:16px/1.4 system-ui">Это мини‑приложение запускается только внутри Telegram. Откройте ссылку через Telegram.</div>';
+                throw new Error('Telegram WebApp required');
+            }
+
+            const cloud = tg.CloudStorage;
+            if (!cloud) {
+                document.body.innerHTML = '<div style="padding:24px;font:16px/1.4 system-ui">Обновите приложение Telegram до последней версии — требуется поддержка CloudStorage.</div>';
+                throw new Error('Telegram CloudStorage required');
+            }
+
+            cs = {
+                getKeys: () => new Promise((res, rej) => cloud.getKeys((e, k) => e ? rej(e) : res(k || []))),
+                getItem: (key) => new Promise((res, rej) => cloud.getItem(key, (e, v) => e ? rej(e) : res(v ?? ''))),
+                setItem: (key, val) => new Promise((res, rej) => cloud.setItem(key, val, (e) => e ? rej(e) : res())),
+                removeItem: (key) => new Promise((res, rej) => cloud.removeItem(key, (e) => e ? rej(e) : res())),
+            };
+
+            currentUser = tg.initDataUnsafe.user;
+            displayUserInfo(currentUser);
+            notesManager = new NotesManager(currentUser.id);
+        }
+
+        function displayUserInfo(user) {
+            const userInfo = document.getElementById('userInfo');
+            const userAvatar = document.getElementById('userAvatar');
+            const userName = document.getElementById('userName');
+            const userUsername = document.getElementById('userUsername');
+
+            userInfo.style.display = 'flex';
+            userAvatar.textContent = user.first_name[0].toUpperCase();
+            userName.textContent = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+            userUsername.textContent = user.username ? '@' + user.username : 'ID: ' + user.id;
+        }
+
         const classData = {
             '2025-09-10': [{ id: '2025-09-10-1', time: '18:00 – 21:15', name: 'Risks and Risk Management', teacher: 'Букович Д., Лосев К.В.', format: 'очно' }],
             '2025-09-12': [{ id: '2025-09-12-1', time: '18:00 – 21:15', name: 'Banking & Fintech Industry', teacher: 'Дорожкин П.Л.', format: 'очно' }],
@@ -621,21 +842,15 @@
             '2025-12-18': [{ id: '2025-12-18-1', time: '18:00 – 22:00', name: 'Research Seminar III', teacher: 'Смирнов М.В.', format: 'очно' }],
             '2025-12-20': [{ id: '2025-12-20-1', time: '10:00 – 13:15', name: 'Fixed income and Derivatives', teacher: 'Герасименко А.А.', format: 'очно' }]
         };
-        const ELECTIVE_NAMES = [
-            'Advanced Performance Management',
-            'Corporate Law in Russia',
-            'Banking & Fintech Industry',
-            'Alternative Investments and Portfolio Management'
-        ];
 
-        // --- КЛАССЫ И МОДУЛИ ---
         class NotesManager {
             constructor(userId) {
-                this.userId = userId;
+                this.userId = userId || 'unknown';
                 this.prefix = `note:${this.userId}:`;
                 this.notes = {};
                 this.ready = this.init();
             }
+
             async init() {
                 if (!cs) return;
                 try {
@@ -646,8 +861,11 @@
                     );
                     this.notes = Object.fromEntries(entries.filter(([, v]) => v && v.length));
                     this.updateNotesDisplay();
-                } catch (e) { console.error('Failed to init notes:', e); }
+                } catch (e) {
+                    console.error('Failed to init notes:', e);
+                }
             }
+
             async setNote(classId, text) {
                 if (!cs) return;
                 const value = (text || '').trim();
@@ -661,69 +879,52 @@
                         await cs.removeItem(key);
                     }
                     this.updateNotesDisplay();
-                } catch (e) { console.error('Failed to save note:', e); }
+                } catch (e) {
+                    console.error('Failed to save note:', e);
+                }
             }
-            getNote(classId) { return this.notes[classId] || ''; }
+
+            getNote(classId) {
+                return this.notes[classId] || '';
+            }
+
             updateNotesDisplay() {
-                document.getElementById('notesCount').textContent = Object.keys(this.notes).length;
+                const count = Object.keys(this.notes).length;
+                const el = document.getElementById('notesCount');
+                if (el) el.textContent = count;
                 document.querySelectorAll('.day.has-note').forEach(day => day.classList.remove('has-note'));
                 Object.keys(this.notes).forEach(classId => {
                     const date = classId.split('-').slice(0, 3).join('-');
-                    const dayElement = document.querySelector(`.day[data-date="${date}"]`);
+                    const dayElement = document.querySelector(`[data-date="${date}"]`);
                     if (dayElement) dayElement.classList.add('has-note');
                 });
             }
         }
 
-        // --- ОСНОВНЫЕ ФУНКЦИИ ---
-        function initializeApp() {
-            if (tg && tg.initDataUnsafe?.user) {
-                tg.ready();
-                tg.expand();
-                const cloud = tg.CloudStorage;
-                if (!cloud) {
-                     document.body.innerHTML = '<div style="padding:24px;font:16px/1.4 system-ui">Обновите приложение Telegram для поддержки CloudStorage.</div>';
-                     return;
-                }
-                cs = {
-                    getKeys: () => new Promise((res, rej) => cloud.getKeys((e, k) => e ? rej(e) : res(k || []))),
-                    getItem: (key) => new Promise((res, rej) => cloud.getItem(key, (e, v) => e ? rej(e) : res(v ?? ''))),
-                    setItem: (key, val) => new Promise((res, rej) => cloud.setItem(key, val, (e) => e ? rej(e) : res())),
-                    removeItem: (key) => new Promise((res, rej) => cloud.removeItem(key, (e) => e ? rej(e) : res())),
-                };
-                currentUser = tg.initDataUnsafe.user;
-                displayUserInfo(currentUser);
-            } else {
-                const store = window.localStorage;
-                cs = {
-                    getKeys: async () => Object.keys(store),
-                    getItem: async (key) => store.getItem(key) ?? '',
-                    setItem: async (key, val) => { store.setItem(key, val); },
-                    removeItem: async (key) => { store.removeItem(key); },
-                };
-                currentUser = { id: 'local_user', first_name: 'Local', last_name: 'User' };
-                displayUserInfo(currentUser);
-            }
-            notesManager = new NotesManager(currentUser.id);
+        const ELECTIVE_NAMES = [
+            'Advanced Performance Management',
+            'Corporate Law in Russia',
+            'Banking & Fintech Industry',
+            'Alternative Investments and Portfolio Management'
+        ];
+
+        function isElective(name) {
+            return ELECTIVE_NAMES.includes(name);
         }
 
-        function displayUserInfo(user) {
-            document.getElementById('userInfo').style.display = 'flex';
-            document.getElementById('userAvatar').textContent = user.first_name[0].toUpperCase();
-            document.getElementById('userName').textContent = user.first_name + (user.last_name ? ' ' + user.last_name : '');
-            document.getElementById('userUsername').textContent = user.username ? '@' + user.username : 'ID: ' + user.id;
-        }
-
-        function isElective(name) { return ELECTIVE_NAMES.includes(name); }
         function buildElectivesUI() {
             const wrap = document.getElementById('electivesList');
             if (!wrap) return;
             wrap.innerHTML = ELECTIVE_NAMES.map(n => {
                 const id = 'elc-' + n.replace(/[^a-z0-9]+/gi, '-').toLowerCase();
                 const checked = selectedElectives.has(n) ? 'checked' : '';
-                return `<label style="display:flex;gap:8px;align-items:center;padding:4px;cursor:pointer;"><input type="checkbox" id="${id}" value="${n}" ${checked} /><span>${n}</span></label>`;
+                return `<label style="display:flex;gap:8px;align-items:center;">
+                            <input type="checkbox" id="${id}" value="${n}" ${checked} />
+                            <span>${n}</span>
+                        </label>`;
             }).join('');
         }
+
         async function loadElectives() {
             if (!cs || !currentUser) return;
             try {
@@ -732,55 +933,96 @@
                     selectedElectives = new Set(JSON.parse(raw));
                 } else {
                     selectedElectives = new Set();
-                    setTimeout(showElectivesModal, 100);
+                    buildElectivesUI();
+                    showElectivesModal();
                 }
             } catch (e) {
                 console.warn('Не удалось загрузить элективы:', e);
                 selectedElectives = new Set();
-                setTimeout(showElectivesModal, 100);
+                buildElectivesUI();
+                showElectivesModal();
             }
         }
+
         function showElectivesModal() {
             buildElectivesUI();
-            document.getElementById('electivesModal').style.display = 'block';
+            const modal = document.getElementById('electivesModal');
+            if (modal) modal.style.display = 'block';
         }
+
         function hideElectivesModal() {
-            document.getElementById('electivesModal').style.display = 'none';
+            const modal = document.getElementById('electivesModal');
+            if (modal) modal.style.display = 'none';
         }
+
         function readElectivesFromUI() {
             const next = new Set();
             ELECTIVE_NAMES.forEach(n => {
                 const id = 'elc-' + n.replace(/[^a-z0-9]+/gi, '-').toLowerCase();
                 const el = document.getElementById(id);
-                if (el?.checked) next.add(n);
+                if (el && el.checked) next.add(n);
             });
             selectedElectives = next;
         }
+
         async function saveElectivesToCloud() {
             if (!cs || !currentUser) return;
             const arr = Array.from(selectedElectives);
             await cs.setItem(`electives:${currentUser.id}`, JSON.stringify(arr));
         }
+
         function filterByElectives(classes) {
             return classes.filter(c => !isElective(c.name) || selectedElectives.has(c.name));
         }
+
+        function recalcDayClasses() {
+            document.querySelectorAll('.day[data-date]').forEach(day => {
+                const date = day.getAttribute('data-date');
+                let items = classData[date] || [];
+                items = filterByElectives(items);
+
+                day.classList.remove('busy', 'online-only', 'free');
+
+                if (!items.length) {
+                    day.classList.add('free');
+                    return;
+                }
+
+                const hasOffline = items.some(c => (c.format || '').toLowerCase() !== 'онлайн');
+                if (hasOffline) {
+                    day.classList.add('busy');
+                } else {
+                    day.classList.add('online-only');
+                }
+            });
+        }
+
         function editNote(classId) {
             document.getElementById(`note-display-${classId}`).style.display = 'none';
             document.getElementById(`note-edit-${classId}`).style.display = 'block';
             document.getElementById(`note-text-${classId}`).focus();
         }
+
         function saveNote(classId) {
             const textarea = document.getElementById(`note-text-${classId}`);
             const text = textarea.value.trim();
+
             notesManager.setNote(classId, text);
+
             const displayDiv = document.getElementById(`note-display-${classId}`);
             displayDiv.textContent = text;
             displayDiv.style.display = text ? 'block' : 'none';
+
             document.getElementById(`note-edit-${classId}`).style.display = 'none';
+
             const btn = document.querySelector(`button[onclick="editNote('${classId}')"]`);
             if (btn) btn.textContent = text ? 'Изменить' : 'Добавить';
-            if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+
+            if (tg && tg.HapticFeedback) {
+                tg.HapticFeedback.notificationOccurred('success');
+            }
         }
+
         function cancelEditNote(classId) {
             const textarea = document.getElementById(`note-text-${classId}`);
             const originalNote = notesManager.getNote(classId);
@@ -789,163 +1031,162 @@
             document.getElementById(`note-edit-${classId}`).style.display = 'none';
             document.getElementById(`note-display-${classId}`).style.display = originalNote ? 'block' : 'none';
         }
+
         async function confirmPopup(message) {
-            if (tg?.showPopup) {
+            if (tg && tg.showPopup) {
                 return new Promise(resolve => {
                     tg.showPopup({
                         message,
                         buttons: [{id: 'yes', type: 'destructive', text: 'Да, сбросить'}, {type: 'cancel'}]
                     }, (id) => resolve(id === 'yes'));
                 });
+            } else {
+                return Promise.resolve(confirm(message));
             }
-            return Promise.resolve(confirm(message));
         }
+
         async function resetProfile() {
             const ok = await confirmPopup('Сбросить выбранные элективы и все заметки? Это действие нельзя отменить.');
-            if (!ok || !cs || !currentUser) return;
+            if (!ok) return;
+            if (!cs || !currentUser) return;
+
             try {
                 const userId = currentUser.id;
                 const keys = await cs.getKeys();
                 const toDelete = keys.filter(k => k.startsWith(`note:${userId}:`) || k === `electives:${userId}`);
-                for (const k of toDelete) { await cs.removeItem(k); }
-                selectedElectives.clear();
+                for (const k of toDelete) {
+                    await cs.removeItem(k);
+                }
+
+                selectedElectives = new Set();
                 notesManager.notes = {};
                 notesManager.updateNotesDisplay();
-                updateCalendarAppearance();
-                if (tg?.showPopup) tg.showPopup({ message: 'Профиль сброшен.' });
-                else alert('Профиль сброшен.');
+                recalcDayClasses();
+
+                if (tg && tg.showPopup) {
+                    tg.showPopup({ message: 'Профиль сброшен.' });
+                } else {
+                    alert('Профиль сброшен.');
+                }
                 showElectivesModal();
             } catch (e) {
                 const errorMessage = 'Ошибка при сбросе профиля: ' + (e?.message || e);
-                if (tg?.showPopup) tg.showPopup({ message: errorMessage });
-                else alert(errorMessage);
+                if (tg && tg.showPopup) {
+                    tg.showPopup({ message: errorMessage });
+                } else {
+                    alert(errorMessage);
+                }
             }
         }
-        
-        function updateCalendarAppearance() {
-            document.querySelectorAll('.day[data-date]').forEach(dayElement => {
-                const date = dayElement.getAttribute('data-date');
-                const initialClasses = classData[date] || [];
-                const remainingClasses = filterByElectives(initialClasses);
-                
-                dayElement.classList.remove('busy', 'free', 'online-only');
-                
-                if (remainingClasses.length > 0) {
-                    const allOnline = remainingClasses.every(cls => cls.format === 'онлайн');
-                    dayElement.classList.add(allOnline ? 'online-only' : 'busy');
-                } else {
-                    dayElement.classList.add('free');
-                }
-            });
-            updateSummaryStatistics();
-        }
 
-        function updateSummaryStatistics() {
-            const classDaysCount = document.querySelectorAll('.day.busy, .day.online-only').length;
-            const freeDaysCount = document.querySelectorAll('.calendar-grid .day.free').length;
-            document.getElementById('classDaysCount').textContent = classDaysCount;
-            document.getElementById('freeDaysCount').textContent = freeDaysCount;
-        }
-
-        // --- ГЛАВНАЯ ФУНКЦИЯ И ЗАПУСК ---
-        async function main() {
-            initializeApp();
-            await loadElectives();
-            setupEventListeners();
-            updateCalendarAppearance();
-        }
-
-        function setupEventListeners() {
-            document.getElementById('configureElectives').addEventListener('click', showElectivesModal);
-            document.getElementById('resetProfile').addEventListener('click', resetProfile);
-
-            const classModal = document.getElementById('classModal');
-            classModal.addEventListener('click', (event) => {
-                if (event.target.classList.contains('close')) {
-                    classModal.style.display = 'none';
-                }
-            });
-            
-            const electivesModal = document.getElementById('electivesModal');
-            electivesModal.addEventListener('click', async (event) => {
-                const target = event.target;
-                if (target.id === 'saveElectives') {
-                    readElectivesFromUI();
-                    await saveElectivesToCloud();
-                    hideElectivesModal();
-                    updateCalendarAppearance();
-                } else if (target.id === 'cancelElectives' || target.id === 'closeElectives') {
-                    hideElectivesModal();
-                }
-            });
-
-            window.addEventListener('click', (event) => {
-                if (event.target === classModal) classModal.style.display = 'none';
-                if (event.target === electivesModal) hideElectivesModal();
-            });
-
-            const monthsGrid = document.querySelector('.months-grid');
-            monthsGrid.addEventListener('click', async function(event) {
-                const day = event.target.closest('.day[data-date]');
-                if (!day || day.classList.contains('free')) return;
-
-                const date = day.getAttribute('data-date');
-                let classes = classData[date] || [];
-                if (notesManager?.ready) await notesManager.ready;
-                
-                classes = filterByElectives(classes);
-                if (classes.length === 0) return; // Не открывать окно, если после фильтрации пар нет
-                
-                document.getElementById('modalTitle').textContent = `Занятия ${new Date(date).toLocaleDateString('ru-RU', {day: 'numeric', month: 'long', year: 'numeric'})}`;
-                const modalBody = document.getElementById('modalBody');
-                
-                modalBody.innerHTML = classes.map(cls => {
-                    const note = notesManager.getNote(cls.id);
-                    return `
-                    <div class="class-item">
-                        <div class="class-time">${cls.time}</div>
-                        <div class="class-name">${cls.name}</div>
-                        <div class="class-teacher">${cls.teacher}</div>
-                        <span class="class-format ${cls.format === 'онлайн' ? 'format-online' : 'format-offline'}">${cls.format}</span>
-                        <div class="note-section">
-                            <div class="note-header">
-                                <span class="note-label">Заметка:</span>
-                                <button class="note-btn" onclick="editNote('${cls.id}')">${note ? 'Изменить' : 'Добавить'}</button>
-                            </div>
-                            <div id="note-display-${cls.id}" class="note-display" style="display: ${note ? 'block' : 'none'}">${note}</div>
-                            <div id="note-edit-${cls.id}" style="display: none;">
-                                <textarea class="note-text" id="note-text-${cls.id}" maxlength="512" placeholder="Добавьте заметку...">${note}</textarea>
-                                <div class="note-char-count"><span id="char-count-${cls.id}">${note.length}</span>/512</div>
-                                <div class="note-actions">
-                                    <button class="btn" onclick="saveNote('${cls.id}')">Сохранить</button>
-                                    <button class="btn btn-secondary" onclick="cancelEditNote('${cls.id}')">Отмена</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>`;
-                }).join('');
-                
-                classModal.style.display = 'block';
-                
-                classes.forEach(cls => {
-                    const textarea = document.getElementById(`note-text-${cls.id}`);
-                    if(textarea) {
-                        textarea.addEventListener('input', () => {
-                            document.getElementById(`char-count-${cls.id}`).textContent = textarea.value.length;
-                        });
-                    }
-                });
-            });
-        }
-        
-        // --- ПРИВЯЗКА ГЛОБАЛЬНЫХ ФУНКЦИЙ К WINDOW ---
         window.editNote = editNote;
         window.saveNote = saveNote;
         window.cancelEditNote = cancelEditNote;
         window.showElectivesModal = showElectivesModal;
-        
-        // --- ЗАПУСК ПРИЛОЖЕНИЯ ---
-        document.addEventListener('DOMContentLoaded', main);
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            const btnConfig = document.getElementById('configureElectives');
+            const btnReset = document.getElementById('resetProfile');
+            const btnCloseEl = document.getElementById('closeElectives');
+            const btnCancelEl = document.getElementById('cancelElectives');
+            const btnSaveEl = document.getElementById('saveElectives');
+
+            btnConfig.addEventListener('click', showElectivesModal);
+            btnReset.addEventListener('click', resetProfile);
+            btnCloseEl.addEventListener('click', hideElectivesModal);
+            btnCancelEl.addEventListener('click', hideElectivesModal);
+            btnSaveEl.addEventListener('click', async () => {
+                try {
+                    readElectivesFromUI();
+                    await saveElectivesToCloud();
+                    recalcDayClasses();
+                } catch (e) {
+                    const msg = 'Не удалось сохранить выбор элективов' + (e?.message ? (': ' + e.message) : '');
+                    if (tg && tg.showPopup) tg.showPopup({ message: msg }); else console.warn(msg, e);
+                } finally {
+                    hideElectivesModal();
+                }
+            });
+
+            await loadElectives();
+            recalcDayClasses();
+
+            const modal = document.getElementById('classModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            const closeBtn = modal.querySelector('.close');
+
+            document.querySelectorAll('.day[data-date]').forEach(day => {
+                day.addEventListener('click', async function() {
+                    if (!notesManager) return;
+
+                    const date = this.getAttribute('data-date');
+                    let classes = classData[date] || [];
+
+                    await notesManager.ready;
+
+                    classes = filterByElectives(classes);
+
+                    if (!classes.length) return;
+
+                    const formattedDate = new Date(date).toLocaleDateString('ru-RU', {
+                        day: 'numeric', month: 'long', year: 'numeric'
+                    });
+
+                    modalTitle.textContent = `Занятия ${formattedDate}`;
+
+                    modalBody.innerHTML = classes.length ? classes.map(cls => {
+                        const fmt = (cls.format === 'онлайн') ? 'online' : 'offline';
+                        const note = notesManager.getNote(cls.id);
+                        return `
+                        <div class="class-item">
+                            <div class="class-time">${cls.time}</div>
+                            <div class="class-name">${cls.name}</div>
+                            <div class="class-teacher">${cls.teacher}</div>
+                            <span class="class-format format-${fmt}">${cls.format}</span>
+                            <div class="note-section">
+                                <div class="note-header">
+                                    <span class="note-label">Заметка:</span>
+                                    <button class="note-btn" onclick="editNote('${cls.id}')">${note ? 'Изменить' : 'Добавить'}</button>
+                                </div>
+                                <div id="note-display-${cls.id}" class="note-display" style="display: ${note ? 'block' : 'none'}">${note}</div>
+                                <div id="note-edit-${cls.id}" style="display: none;">
+                                    <textarea class="note-text" id="note-text-${cls.id}" maxlength="512" placeholder="Добавьте заметку (до 512 символов)...">${note}</textarea>
+                                    <div class="note-char-count"><span id="char-count-${cls.id}">${note.length}</span>/512</div>
+                                    <div class="note-actions">
+                                        <button class="btn" onclick="saveNote('${cls.id}')">Сохранить</button>
+                                        <button class="btn btn-secondary" onclick="cancelEditNote('${cls.id}')">Отмена</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                    }).join('') : `<div style="padding:16px;">На этот день у вас нет занятий из выбранных элективов.<br/><br/><button class="btn" onclick="showElectivesModal()">Выбрать элективы</button></div>`;
+
+                    modal.style.display = 'block';
+
+                    classes.forEach(cls => {
+                        const textarea = document.getElementById(`note-text-${cls.id}`);
+                        const charCount = document.getElementById(`char-count-${cls.id}`);
+                        if (textarea && charCount) {
+                            textarea.addEventListener('input', () => {
+                                charCount.textContent = textarea.value.length;
+                            });
+                        }
+                    });
+                });
+            });
+
+            closeBtn.addEventListener('click', () => { modal.style.display = 'none'; });
+            window.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+
+        if (tg) {
+            document.body.style.backgroundColor = 'var(--tg-theme-bg-color)';
+        }
     </script>
 </body>
 </html>
