@@ -846,24 +846,84 @@
             }
         }
 
-        // --- ДОБАВЛЕННЫЕ ФУНКЦИИ-ЗАГЛУШКИ ДЛЯ ЭЛЕКТИВОВ ---
-        function loadElectives() { console.log("Загрузка выбранных элективов..."); }
-        function showElectivesModal() { 
-            document.getElementById('electivesModal').style.display = 'block'; 
-            console.log("Показать модальное окно элективов");
+        
+        // --- ЭЛЕКТИВЫ (CloudStorage) ---
+        const ELECTIVE_NAMES = [
+            'Advanced Performance Management',
+            'Corporate Law in Russia',
+            'Banking & Fintech Industry',
+            'Alternative Investments and Portfolio Management'
+        ];
+
+        function isElective(name) {
+            return ELECTIVE_NAMES.includes(name);
         }
-        function hideElectivesModal() { 
-            document.getElementById('electivesModal').style.display = 'none';
-            console.log("Скрыть модальное окно элективов");
+
+        function buildElectivesUI() {
+            const wrap = document.getElementById('electivesList');
+            if (!wrap) return;
+            wrap.innerHTML = ELECTIVE_NAMES.map(n => {
+                const id = 'elc-' + n.replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+                const checked = selectedElectives.has(n) ? 'checked' : '';
+                return `<label style="display:flex;gap:8px;align-items:center;">
+                            <input type="checkbox" id="${id}" value="${n}" ${checked} />
+                            <span>${n}</span>
+                        </label>`;
+            }).join('');
         }
-        function readElectivesFromUI() { console.log("Чтение выбора из UI..."); }
-        async function saveElectivesToCloud() { console.log("Сохранение элективов в облако..."); }
+
+        async function loadElectives() {
+            try {
+                const raw = await cs.getItem(`electives:${currentUser.id}`);
+                if (raw) {
+                    selectedElectives = new Set(JSON.parse(raw));
+                } else {
+                    // первый запуск — показываем выбор
+                    selectedElectives = new Set();
+                    buildElectivesUI();
+                    showElectivesModal();
+                }
+            } catch (e) {
+                console.warn('Не удалось загрузить элективы:', e);
+                // всё равно позволим выбрать
+                selectedElectives = new Set();
+                buildElectivesUI();
+                showElectivesModal();
+            }
+        }
+
+        function showElectivesModal() {
+            buildElectivesUI();
+            const modal = document.getElementById('electivesModal');
+            if (modal) modal.style.display = 'block';
+        }
+
+        function hideElectivesModal() {
+            const modal = document.getElementById('electivesModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function readElectivesFromUI() {
+            const next = new Set();
+            ELECTIVE_NAMES.forEach(n => {
+                const id = 'elc-' + n.replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+                const el = document.getElementById(id);
+                if (el && el.checked) next.add(n);
+            });
+            selectedElectives = next;
+        }
+
+        async function saveElectivesToCloud() {
+            const arr = Array.from(selectedElectives);
+            await cs.setItem(`electives:${currentUser.id}`, JSON.stringify(arr));
+        }
+
         function filterByElectives(classes) {
-            console.log("Фильтрация занятий по элективам (пока не реализована)");
-            // В будущем здесь будет логика фильтрации
-            return classes;
+            // неэлективные дисциплины показываем всегда
+            return classes.filter(c => !isElective(c.name) || selectedElectives.has(c.name));
         }
-        // --- КОНЕЦ БЛОКА ФУНКЦИЙ-ЗАГЛУШЕК ---
+        // --- КОНЕЦ БЛОКА ЭЛЕКТИВОВ ---
+    
         
         document.addEventListener('DOMContentLoaded', function() {
             const btnConfig = document.getElementById('configureElectives');
@@ -985,7 +1045,7 @@
             const textarea = document.getElementById(`note-text-${classId}`);
             const originalNote = notesManager.getNote(classId);
             textarea.value = originalNote;
-            document.getElementById(`note-char-count-${classId}`).textContent = originalNote.length;
+            document.getElementById(`char-count-${classId}`).textContent = originalNote.length;
             document.getElementById(`note-edit-${classId}`).style.display = 'none';
             document.getElementById(`note-display-${classId}`).style.display = originalNote ? 'block' : 'none';
         }
