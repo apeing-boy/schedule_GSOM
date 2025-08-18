@@ -742,48 +742,47 @@
         let currentUser = null;
         let notesManager = null;
         let selectedElectives = new Set();
-        let cs = null; // Глобальная переменная для CloudStorage
+        let cs = null;
         
-        if (tg) {
-            tg.ready();
-            tg.expand();
-        
-            if (!tg.initDataUnsafe?.user) {
-                document.body.innerHTML = '<div style="padding:24px;font:16px/1.4 system-ui">Это мини‑приложение запускается только внутри Telegram. Откройте ссылку через Telegram.</div>';
-                throw new Error('Telegram WebApp required');
+        // --- ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ ---
+        function initializeApp() {
+            if (tg && tg.initDataUnsafe?.user) {
+                tg.ready();
+                tg.expand();
+                const cloud = tg.CloudStorage;
+                
+                if (cloud) {
+                    cs = {
+                        getKeys: () => new Promise((res, rej) => cloud.getKeys((e, k) => e ? rej(e) : res(k || []))),
+                        getItem: (key) => new Promise((res, rej) => cloud.getItem(key, (e, v) => e ? rej(e) : res(v ?? ''))),
+                        setItem: (key, val) => new Promise((res, rej) => cloud.setItem(key, val, (e) => e ? rej(e) : res())),
+                        removeItem: (key) => new Promise((res, rej) => cloud.removeItem(key, (e) => e ? rej(e) : res())),
+                    };
+                } else {
+                     document.body.innerHTML = '<div style="padding:24px;font:16px/1.4 system-ui">Обновите приложение Telegram до последней версии — требуется поддержка CloudStorage.</div>';
+                     return; // Прекращаем выполнение, если нет CloudStorage
+                }
+
+                currentUser = tg.initDataUnsafe.user;
+                notesManager = new NotesManager(currentUser.id);
+                displayUserInfo(currentUser);
+            } else {
+                // Fallback для запуска в обычном браузере
+                const store = window.localStorage;
+                cs = {
+                    getKeys: async () => Object.keys(store),
+                    getItem: async (key) => store.getItem(key) ?? '',
+                    setItem: async (key, val) => { store.setItem(key, val); },
+                    removeItem: async (key) => { store.removeItem(key); },
+                };
+                currentUser = { id: 'local_user', first_name: 'Local', last_name: 'User' };
+                notesManager = new NotesManager(currentUser.id);
+                displayUserInfo(currentUser);
             }
-        
-            const cloud = tg.CloudStorage;
-            if (!cloud) {
-    // Fallback: work without CloudStorage (localStorage polyfill)
-    const store = window.localStorage;
-    cs = {
-        getKeys: async () => Object.keys(store),
-        getItem: async (key) => store.getItem(key) ?? '',
-        setItem: async (key, val) => { store.setItem(key, val); },
-        removeItem: async (key) => { store.removeItem(key); },
-    };
-} else {
-    cs = {
-        getKeys: () => new Promise((res, rej) => cloud.getKeys((e, k) => e ? rej(e) : res(k || []))),
-        getItem: (key) => new Promise((res, rej) => cloud.getItem(key, (e, v) => e ? rej(e) : res(v ?? ''))),
-        setItem: (key, val) => new Promise((res, rej) => cloud.setItem(key, val, (e) => e ? rej(e) : res())),
-        removeItem: (key) => new Promise((res, rej) => cloud.removeItem(key, (e) => e ? rej(e) : res())),
-    };
-}
-        
-            cs = {
-                getKeys: () => new Promise((res, rej) => cloud.getKeys((e, k) => e ? rej(e) : res(k || []))),
-                getItem: (key) => new Promise((res, rej) => cloud.getItem(key, (e, v) => e ? rej(e) : res(v ?? ''))),
-                setItem: (key, val) => new Promise((res, rej) => cloud.setItem(key, val, (e) => e ? rej(e) : res())),
-                removeItem: (key) => new Promise((res, rej) => cloud.removeItem(key, (e) => e ? rej(e) : res())),
-            };
-            
-            currentUser = tg.initDataUnsafe.user;
-            displayUserInfo(currentUser);
-            notesManager = new NotesManager(currentUser.id);
         }
-        
+
+        initializeApp();
+
         function displayUserInfo(user) {
             const userInfo = document.getElementById('userInfo');
             const userAvatar = document.getElementById('userAvatar');
@@ -951,12 +950,7 @@
         }
 
         async function loadElectives() {
-            if (!cs || !currentUser) {
-                selectedElectives = new Set();
-                buildElectivesUI();
-                showElectivesModal();
-                return;
-            }
+            if (!cs || !currentUser) return;
             try {
                 const raw = await cs.getItem(`electives:${currentUser.id}`);
                 if (raw) {
@@ -1014,19 +1008,14 @@
         function saveNote(classId) {
             const textarea = document.getElementById(`note-text-${classId}`);
             const text = textarea.value.trim();
-            
             notesManager.setNote(classId, text);
-            
             const displayDiv = document.getElementById(`note-display-${classId}`);
             displayDiv.textContent = text;
             displayDiv.style.display = text ? 'block' : 'none';
-            
             document.getElementById(`note-edit-${classId}`).style.display = 'none';
-            
             const btn = document.querySelector(`button[onclick="editNote('${classId}')"]`);
             if (btn) btn.textContent = text ? 'Изменить' : 'Добавить';
-            
-            if (tg && tg.HapticFeedback) {
+            if (tg?.HapticFeedback) {
                 tg.HapticFeedback.notificationOccurred('success');
             }
         }
@@ -1041,22 +1030,20 @@
         }
 
         async function confirmPopup(message) {
-            if (tg && tg.showPopup) {
+            if (tg?.showPopup) {
                 return new Promise(resolve => {
                     tg.showPopup({
                         message,
                         buttons: [{id: 'yes', type: 'destructive', text: 'Да, сбросить'}, {type: 'cancel'}]
                     }, (id) => resolve(id === 'yes'));
                 });
-            } else {
-                return Promise.resolve(confirm(message));
             }
+            return Promise.resolve(confirm(message));
         }
 
         async function resetProfile() {
             const ok = await confirmPopup('Сбросить выбранные элективы и все заметки? Это действие нельзя отменить.');
-            if (!ok) return;
-            if (!cs || !currentUser) return;
+            if (!ok || !cs || !currentUser) return;
             
             try {
                 const userId = currentUser.id;
@@ -1065,12 +1052,11 @@
                 for (const k of toDelete) {
                     await cs.removeItem(k);
                 }
-                
-                selectedElectives = new Set();
+                selectedElectives.clear();
                 notesManager.notes = {};
                 notesManager.updateNotesDisplay();
                 
-                if (tg && tg.showPopup) {
+                if (tg?.showPopup) {
                     tg.showPopup({ message: 'Профиль сброшен.' });
                 } else {
                     alert('Профиль сброшен.');
@@ -1078,7 +1064,7 @@
                 showElectivesModal();
             } catch (e) {
                 const errorMessage = 'Ошибка при сбросе профиля: ' + (e?.message || e);
-                if (tg && tg.showPopup) {
+                if (tg?.showPopup) {
                     tg.showPopup({ message: errorMessage });
                 } else {
                     alert(errorMessage);
@@ -1092,6 +1078,8 @@
         window.showElectivesModal = showElectivesModal;
         
         document.addEventListener('DOMContentLoaded', async function() {
+            await loadElectives();
+            
             const btnConfig = document.getElementById('configureElectives');
             const btnReset = document.getElementById('resetProfile');
             const btnCloseEl = document.getElementById('closeElectives');
@@ -1108,11 +1096,7 @@
                 hideElectivesModal();
             });
 
-            await loadElectives();
-
-            
-            if (!notesManager) notesManager = new NotesManager('local');
-const modal = document.getElementById('classModal');
+            const modal = document.getElementById('classModal');
             const modalTitle = document.getElementById('modalTitle');
             const modalBody = document.getElementById('modalBody');
             const closeBtn = modal.querySelector('.close');
@@ -1135,6 +1119,8 @@ const modal = document.getElementById('classModal');
                     modalBody.innerHTML = classes.length ? classes.map(cls => {
                         const fmt = (cls.format === 'онлайн') ? 'online' : 'offline';
                         const note = notesManager ? notesManager.getNote(cls.id) : '';
+                        const disabledAttr = !notesManager ? 'disabled style="pointer-events:none;opacity:.5;"' : '';
+
                         return `
                         <div class="class-item">
                             <div class="class-time">${cls.time}</div>
@@ -1144,7 +1130,7 @@ const modal = document.getElementById('classModal');
                             <div class="note-section">
                                 <div class="note-header">
                                     <span class="note-label">Заметка:</span>
-                                    <button class="note-btn" ${!notesManager ? \'disabled style="pointer-events:none;opacity:.5;"\' : ""} onclick="editNote('${cls.id}')">${note ? 'Изменить' : 'Добавить'}</button>
+                                    <button class="note-btn" ${disabledAttr} onclick="editNote('${cls.id}')">${note ? 'Изменить' : 'Добавить'}</button>
                                 </div>
                                 <div id="note-display-${cls.id}" class="note-display" style="display: ${note ? 'block' : 'none'}">${note}</div>
                                 <div id="note-edit-${cls.id}" style="display: none;">
