@@ -529,8 +529,8 @@
         <div class="summary">
             <h3>📊 Статистика</h3>
             <div class="stats">
-                <div class="stat"><div class="stat-number" id="freeDays">47</div><div class="stat-label">Свободных дней</div></div>
-                <div class="stat"><div class="stat-number" id="classDays">35</div><div class="stat-label">Дней с занятиями</div></div>
+                <div class="stat"><div class="stat-number" id="freeDaysCount">0</div><div class="stat-label">Свободных дней</div></div>
+                <div class="stat"><div class="stat-number" id="classDaysCount">0</div><div class="stat-label">Дней с занятиями</div></div>
                 <div class="stat"><div class="stat-number">40</div><div class="stat-label">Выходных</div></div>
                 <div class="stat"><div class="stat-number" id="notesCount">0</div><div class="stat-label">Заметок</div></div>
             </div>
@@ -646,9 +646,7 @@
                     );
                     this.notes = Object.fromEntries(entries.filter(([, v]) => v && v.length));
                     this.updateNotesDisplay();
-                } catch (e) {
-                    console.error('Failed to init notes:', e);
-                }
+                } catch (e) { console.error('Failed to init notes:', e); }
             }
             async setNote(classId, text) {
                 if (!cs) return;
@@ -663,19 +661,15 @@
                         await cs.removeItem(key);
                     }
                     this.updateNotesDisplay();
-                } catch (e) {
-                    console.error('Failed to save note:', e);
-                }
+                } catch (e) { console.error('Failed to save note:', e); }
             }
             getNote(classId) { return this.notes[classId] || ''; }
             updateNotesDisplay() {
-                const count = Object.keys(this.notes).length;
-                const el = document.getElementById('notesCount');
-                if (el) el.textContent = count;
+                document.getElementById('notesCount').textContent = Object.keys(this.notes).length;
                 document.querySelectorAll('.day.has-note').forEach(day => day.classList.remove('has-note'));
                 Object.keys(this.notes).forEach(classId => {
                     const date = classId.split('-').slice(0, 3).join('-');
-                    const dayElement = document.querySelector(`[data-date="${date}"]`);
+                    const dayElement = document.querySelector(`.day[data-date="${date}"]`);
                     if (dayElement) dayElement.classList.add('has-note');
                 });
             }
@@ -698,7 +692,6 @@
                     removeItem: (key) => new Promise((res, rej) => cloud.removeItem(key, (e) => e ? rej(e) : res())),
                 };
                 currentUser = tg.initDataUnsafe.user;
-                notesManager = new NotesManager(currentUser.id);
                 displayUserInfo(currentUser);
             } else {
                 // Fallback для отладки в браузере
@@ -710,9 +703,9 @@
                     removeItem: async (key) => { store.removeItem(key); },
                 };
                 currentUser = { id: 'local_user', first_name: 'Local', last_name: 'User' };
-                notesManager = new NotesManager(currentUser.id);
                 displayUserInfo(currentUser);
             }
+            notesManager = new NotesManager(currentUser.id);
         }
 
         function displayUserInfo(user) {
@@ -740,7 +733,7 @@
                     selectedElectives = new Set(JSON.parse(raw));
                 } else {
                     selectedElectives = new Set();
-                    setTimeout(showElectivesModal, 100); // Небольшая задержка для UI
+                    setTimeout(showElectivesModal, 100);
                 }
             } catch (e) {
                 console.warn('Не удалось загрузить элективы:', e);
@@ -819,6 +812,7 @@
                 selectedElectives.clear();
                 notesManager.notes = {};
                 notesManager.updateNotesDisplay();
+                updateCalendarAppearance(); // Обновляем календарь после сброса
                 if (tg?.showPopup) tg.showPopup({ message: 'Профиль сброшен.' });
                 else alert('Профиль сброшен.');
                 showElectivesModal();
@@ -828,12 +822,38 @@
                 else alert(errorMessage);
             }
         }
+        
+        function updateCalendarAppearance() {
+            document.querySelectorAll('.day[data-date]').forEach(dayElement => {
+                const date = dayElement.getAttribute('data-date');
+                const initialClasses = classData[date] || [];
+                const remainingClasses = filterByElectives(initialClasses);
+                
+                dayElement.classList.remove('busy', 'free', 'online-only');
+                
+                if (remainingClasses.length > 0) {
+                    const allOnline = remainingClasses.every(cls => cls.format === 'онлайн');
+                    dayElement.classList.add(allOnline ? 'online-only' : 'busy');
+                } else {
+                    dayElement.classList.add('free');
+                }
+            });
+            updateSummaryStatistics();
+        }
+
+        function updateSummaryStatistics() {
+            const classDaysCount = document.querySelectorAll('.day.busy, .day.online-only').length;
+            const freeDaysCount = document.querySelectorAll('.calendar-grid .day.free').length; // Считаем только дни в сетке
+            document.getElementById('classDaysCount').textContent = classDaysCount;
+            document.getElementById('freeDaysCount').textContent = freeDaysCount;
+        }
 
         // --- ГЛАВНАЯ ФУНКЦИЯ И ЗАПУСК ---
         async function main() {
             initializeApp();
-            await loadElectives(); // СНАЧАЛА ждем загрузки данных
-            setupEventListeners(); // ПОТОМ делаем интерфейс интерактивным
+            await loadElectives();
+            setupEventListeners();
+            updateCalendarAppearance();
         }
 
         function setupEventListeners() {
@@ -841,10 +861,12 @@
             document.getElementById('resetProfile').addEventListener('click', resetProfile);
             document.getElementById('closeElectives').addEventListener('click', hideElectivesModal);
             document.getElementById('cancelElectives').addEventListener('click', hideElectivesModal);
+            
             document.getElementById('saveElectives').addEventListener('click', async () => {
                 readElectivesFromUI();
                 await saveElectivesToCloud();
                 hideElectivesModal();
+                updateCalendarAppearance(); // <-- ГЛАВНОЕ ИСПРАВЛЕНИЕ
             });
 
             const classModal = document.getElementById('classModal');
@@ -909,11 +931,13 @@
             });
         }
         
+        // --- ПРИВЯЗКА ГЛОБАЛЬНЫХ ФУНКЦИЙ К WINDOW ---
         window.editNote = editNote;
         window.saveNote = saveNote;
         window.cancelEditNote = cancelEditNote;
         window.showElectivesModal = showElectivesModal;
         
+        // --- ЗАПУСК ПРИЛОЖЕНИЯ ---
         document.addEventListener('DOMContentLoaded', main);
     </script>
 </body>
