@@ -389,7 +389,23 @@
             h1 { font-size: 1.5em; }
             .day { font-size: 0.8em; }
         }
+    
+        .fab {
+            position: fixed;
+            right: 16px; bottom: 16px;
+            padding: 12px 16px;
+            border-radius: 999px;
+            background: var(--tg-theme-button-color, #0088cc);
+            color: var(--tg-theme-button-text-color, #fff);
+            border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.15);
+            font-weight: 600;
+        }
+        #electivesModal { display: none; position: fixed; z-index: 2000; inset: 0; background: rgba(0,0,0,.4); }
+        #electivesModal .modal-content { background: var(--tg-theme-bg-color, #fff); margin: 5% auto; padding: 16px; border-radius: 12px; width: min(560px, 92%); }
+        .electives-list { display: grid; gap: 8px; margin: 12px 0; }
+        .electives-actions { display:flex; gap:8px; justify-content:flex-end; margin-top: 12px; }
     </style>
+    
 </head>
 <body>
     <div class="container">
@@ -663,8 +679,6 @@
         if (tg) {
             tg.ready();
             tg.expand();
-        }
-        
         // --- Только Telegram Mini App + CloudStorage ---
         if (!tg || !tg.initDataUnsafe?.user) {
             document.body.innerHTML = '<div style="padding:24px;font:16px/1.4 system-ui">Это мини‑приложение запускается только внутри Telegram. Откройте ссылку через Telegram.</div>';
@@ -672,21 +686,21 @@
         }
         const cloud = tg.CloudStorage;
         if (!cloud) {
-            document.body.innerHTML = '<div style="padding:24px;font:16px/1.4 system-ui">Обновите приложение Telegram до последней версии — требуется поддержка CloudStorage.</div>';
+            document.body.innerHTML = '<div style="padding:24px;font:16px/1.4 systemок system-ui">Обновите приложение Telegram до последней версии — требуется поддержка CloudStorage.</div>';
             throw new Error('Telegram CloudStorage required');
         }
-        // Promise-обёртки над callback-API CloudStorage
         const cs = {
             getKeys: () => new Promise((res, rej) => cloud.getKeys((e, k) => e ? rej(e) : res(k || []))),
             getItem: (key) => new Promise((res, rej) => cloud.getItem(key, (e, v) => e ? rej(e) : res(v ?? ''))),
             setItem: (key, val) => new Promise((res, rej) => cloud.setItem(key, val, (e) => e ? rej(e) : res())),
             removeItem: (key) => new Promise((res, rej) => cloud.removeItem(key, (e) => e ? rej(e) : res())),
         };
-
-        // Получение данных пользователя (только внутри Telegram)
+    
+        }
+        
+        // Получение данных пользователя (только Telegram)
         currentUser = tg.initDataUnsafe.user;
         displayUserInfo(currentUser);
-        
         function displayUserInfo(user) {
             const userInfo = document.getElementById('userInfo');
             const userAvatar = document.getElementById('userAvatar');
@@ -838,6 +852,8 @@
             ]
         };
 
+        // Система заметок
+        
         // Система заметок: только CloudStorage (без localStorage)
         class NotesManager {
             constructor(userId) {
@@ -846,7 +862,6 @@
                 this.notes = {};
                 this.ready = this.init();
             }
-
             async init() {
                 const keys = await cs.getKeys();
                 const myKeys = keys.filter(k => k.startsWith(this.prefix));
@@ -856,7 +871,6 @@
                 this.notes = Object.fromEntries(entries.filter(([, v]) => v && v.length));
                 this.updateNotesDisplay();
             }
-
             async setNote(classId, text) {
                 const value = (text || '').trim();
                 const key = this.prefix + classId;
@@ -869,29 +883,44 @@
                 }
                 this.updateNotesDisplay();
             }
-
-            getNote(classId) {
-                return this.notes[classId] || '';
-            }
-
+            getNote(classId) { return this.notes[classId] || ''; }
             updateNotesDisplay() {
                 const count = Object.keys(this.notes).length;
                 const el = document.getElementById('notesCount');
                 if (el) el.textContent = count;
-
                 document.querySelectorAll('.day.has-note').forEach(day => day.classList.remove('has-note'));
                 Object.keys(this.notes).forEach(classId => {
-                    const date = classId.split('-').slice(0, 3).join('-');
+                    const date = classId.split('-').slice(0, 3).join('-'); // fix
                     const dayElement = document.querySelector(`[data-date="${date}"]`);
                     if (dayElement) dayElement.classList.add('has-note');
                 });
             }
         }
-
-        const notesManager = new NotesManager(currentUser?.id);
         
+        const notesManager
+     = new NotesManager();
+
         // Обработчики событий
         document.addEventListener('DOMContentLoaded', function() {
+
+            // Кнопки выбора элективов
+            const btnConfig = document.getElementById('configureElectives');
+            const btnCloseEl = document.getElementById('closeElectives');
+            const btnCancelEl = document.getElementById('cancelElectives');
+            const btnSaveEl = document.getElementById('saveElectives');
+
+            btnConfig.addEventListener('click', () => { showElectivesModal(); });
+            btnCloseEl.addEventListener('click', () => hideElectivesModal());
+            btnCancelEl.addEventListener('click', () => hideElectivesModal());
+            btnSaveEl.addEventListener('click', async () => {
+                readElectivesFromUI();
+                await saveElectivesToCloud();
+                hideElectivesModal();
+            });
+
+            // Загрузка элективов при старте
+            loadElectives();
+
             const modal = document.getElementById('classModal');
             const modalTitle = document.getElementById('modalTitle');
             const modalBody = document.getElementById('modalBody');
@@ -901,10 +930,11 @@
             document.querySelectorAll('.day.busy[data-date], .day.online-only[data-date]').forEach(day => {
                 day.addEventListener('click', async function() {
                     const date = this.getAttribute('data-date');
-                    const classes = classData[date];
-                    
+                    let classes = classData[date];
                     await notesManager.ready;
-                    if (classes) {
+                    // фильтр по элективам
+                    if (Array.isArray(classes)) { classes = filterByElectives(classes); }
+if (classes && classes.length) {
                         const formattedDate = new Date(date).toLocaleDateString('ru-RU', {
                             day: 'numeric',
                             month: 'long',
@@ -913,9 +943,9 @@
                         
                         modalTitle.textContent = `Занятия ${formattedDate}`;
                         
-                        modalBody.innerHTML = classes.map(cls => {
-                        const fmt = (cls.format === 'онлайн') ? 'online' : 'offline';
-                        return `
+                        modalBody.innerHTML = classes.length ? classes.map(cls => {
+                            const fmt = (cls.format === 'онлайн') ? 'online' : 'offline';
+                            return `
                             <div class="class-item">
                                 <div class="class-time">${cls.time}</div>
                                 <div class="class-name">${cls.name}</div>
@@ -945,8 +975,7 @@
                                     </div>
                                 </div>
                             </div>
-                        `;
-                    }).join('');
+                        `).join('');
                         
                         modal.style.display = 'block';
                         
