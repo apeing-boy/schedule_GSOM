@@ -759,7 +759,6 @@
                 throw new Error('Telegram CloudStorage required');
             }
         
-            // Инициализация cs глобально
             cs = {
                 getKeys: () => new Promise((res, rej) => cloud.getKeys((e, k) => e ? rej(e) : res(k || []))),
                 getItem: (key) => new Promise((res, rej) => cloud.getItem(key, (e, v) => e ? rej(e) : res(v ?? ''))),
@@ -865,7 +864,7 @@
             }
             
             async init() {
-                if (!cs) return; // Проверка наличия cs
+                if (!cs) return;
                 try {
                     const keys = await cs.getKeys();
                     const myKeys = keys.filter(k => k.startsWith(this.prefix));
@@ -880,7 +879,7 @@
             }
             
             async setNote(classId, text) {
-                if (!cs) return; // Проверка наличия cs
+                if (!cs) return;
                 const value = (text || '').trim();
                 const key = this.prefix + classId;
                 try {
@@ -914,7 +913,7 @@
             }
         }
 
-        // --- ЭЛЕКТИВЫ (CloudStorage) ---
+        // --- ЭЛЕКТИВЫ ---
         const ELECTIVE_NAMES = [
             'Advanced Performance Management',
             'Corporate Law in Russia',
@@ -940,13 +939,12 @@
         }
 
         async function loadElectives() {
-            if (!cs || !currentUser) return; // Проверка наличия cs и currentUser
+            if (!cs || !currentUser) return;
             try {
                 const raw = await cs.getItem(`electives:${currentUser.id}`);
                 if (raw) {
                     selectedElectives = new Set(JSON.parse(raw));
                 } else {
-                    // первый запуск — показываем выбор
                     selectedElectives = new Set();
                     buildElectivesUI();
                     showElectivesModal();
@@ -981,34 +979,33 @@
         }
 
         async function saveElectivesToCloud() {
-            if (!cs || !currentUser) return; // Проверка наличия cs и currentUser
+            if (!cs || !currentUser) return;
             const arr = Array.from(selectedElectives);
             await cs.setItem(`electives:${currentUser.id}`, JSON.stringify(arr));
         }
 
         function filterByElectives(classes) {
-            // неэлективные дисциплины показываем всегда
             return classes.filter(c => !isElective(c.name) || selectedElectives.has(c.name));
         }
         
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() { // <- ИЗМЕНЕНИЕ ЗДЕСЬ
             const btnConfig = document.getElementById('configureElectives');
             const btnReset = document.getElementById('resetProfile');
             const btnCloseEl = document.getElementById('closeElectives');
             const btnCancelEl = document.getElementById('cancelElectives');
             const btnSaveEl = document.getElementById('saveElectives');
 
-            btnConfig.addEventListener('click', () => showElectivesModal());
-            btnReset.addEventListener('click', () => resetProfile());
-            btnCloseEl.addEventListener('click', () => hideElectivesModal());
-            btnCancelEl.addEventListener('click', () => hideElectivesModal());
+            btnConfig.addEventListener('click', showElectivesModal);
+            btnReset.addEventListener('click', resetProfile);
+            btnCloseEl.addEventListener('click', hideElectivesModal);
+            btnCancelEl.addEventListener('click', hideElectivesModal);
             btnSaveEl.addEventListener('click', async () => {
                 readElectivesFromUI();
                 await saveElectivesToCloud();
                 hideElectivesModal();
             });
 
-            loadElectives();
+            await loadElectives(); // <- И ИЗМЕНЕНИЕ ЗДЕСЬ
 
             const modal = document.getElementById('classModal');
             const modalTitle = document.getElementById('modalTitle');
@@ -1132,7 +1129,7 @@
         async function resetProfile() {
             const ok = await confirmPopup('Сбросить выбранные элективы и все заметки? Это действие нельзя отменить.');
             if (!ok) return;
-            if (!cs || !currentUser) return; // Проверка наличия cs и currentUser
+            if (!cs || !currentUser) return;
             
             try {
                 const userId = currentUser.id;
