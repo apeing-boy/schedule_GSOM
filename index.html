@@ -742,17 +742,24 @@
             }
 
             const cloud = tg.CloudStorage;
-            if (!cloud) {
-                document.body.innerHTML = '<div style="padding:24px;font:16px/1.4 system-ui">Обновите приложение Telegram до последней версии — требуется поддержка CloudStorage.</div>';
-                throw new Error('Telegram CloudStorage required');
-            }
+if (!cloud) {
+    // Fallback: work without CloudStorage (localStorage polyfill)
+    const store = window.localStorage;
+    cs = {
+        getKeys: async () => Object.keys(store),
+        getItem: async (key) => store.getItem(key) ?? '',
+        setItem: async (key, val) => { store.setItem(key, val); },
+        removeItem: async (key) => { store.removeItem(key); },
+    };
+} else {
+    cs = {
+        getKeys: () => new Promise((res, rej) => cloud.getKeys((e, k) => e ? rej(e) : res(k || []))),
+        getItem: (key) => new Promise((res, rej) => cloud.getItem(key, (e, v) => e ? rej(e) : res(v ?? ''))),
+        setItem: (key, val) => new Promise((res, rej) => cloud.setItem(key, val, (e) => e ? rej(e) : res())),
+        removeItem: (key) => new Promise((res, rej) => cloud.removeItem(key, (e) => e ? rej(e) : res())),
+    };
+}
 
-            cs = {
-                getKeys: () => new Promise((res, rej) => cloud.getKeys((e, k) => e ? rej(e) : res(k || []))),
-                getItem: (key) => new Promise((res, rej) => cloud.getItem(key, (e, v) => e ? rej(e) : res(v ?? ''))),
-                setItem: (key, val) => new Promise((res, rej) => cloud.setItem(key, val, (e) => e ? rej(e) : res())),
-                removeItem: (key) => new Promise((res, rej) => cloud.removeItem(key, (e) => e ? rej(e) : res())),
-            };
 
             currentUser = tg.initDataUnsafe.user;
             displayUserInfo(currentUser);
@@ -926,7 +933,12 @@
         }
 
         async function loadElectives() {
-            if (!cs || !currentUser) return;
+            if (!cs || !currentUser) {
+                selectedElectives = new Set();
+                buildElectivesUI();
+                showElectivesModal();
+                return;
+            }
             try {
                 const raw = await cs.getItem(`electives:${currentUser.id}`);
                 if (raw) {
@@ -1007,7 +1019,7 @@
             const textarea = document.getElementById(`note-text-${classId}`);
             const text = textarea.value.trim();
 
-            notesManager.setNote(classId, text);
+            if (notesManager) notesManager.setNote(classId, text);
 
             const displayDiv = document.getElementById(`note-display-${classId}`);
             displayDiv.textContent = text;
@@ -1025,7 +1037,7 @@
 
         function cancelEditNote(classId) {
             const textarea = document.getElementById(`note-text-${classId}`);
-            const originalNote = notesManager.getNote(classId);
+            const originalNote = notesManager ? notesManager.getNote(classId) : '';
             textarea.value = originalNote;
             document.getElementById(`char-count-${classId}`).textContent = originalNote.length;
             document.getElementById(`note-edit-${classId}`).style.display = 'none';
@@ -1048,7 +1060,12 @@
         async function resetProfile() {
             const ok = await confirmPopup('Сбросить выбранные элективы и все заметки? Это действие нельзя отменить.');
             if (!ok) return;
-            if (!cs || !currentUser) return;
+            if (!cs || !currentUser) {
+            selectedElectives = new Set();
+            recalcDayClasses();
+            showElectivesModal();
+            return;
+        }
 
             try {
                 const userId = currentUser.id;
@@ -1118,12 +1135,11 @@
 
             document.querySelectorAll('.day[data-date]').forEach(day => {
                 day.addEventListener('click', async function() {
-                    if (!notesManager) return;
-
-                    const date = this.getAttribute('data-date');
+                    // allow opening even if notesManager is not ready
+const date = this.getAttribute('data-date');
                     let classes = classData[date] || [];
 
-                    await notesManager.ready;
+                    if (notesManager?.ready) await notesManager.ready;
 
                     classes = filterByElectives(classes);
 
@@ -1137,7 +1153,7 @@
 
                     modalBody.innerHTML = classes.length ? classes.map(cls => {
                         const fmt = (cls.format === 'онлайн') ? 'online' : 'offline';
-                        const note = notesManager.getNote(cls.id);
+                        const note = notesManager ? notesManager.getNote(cls.id) : '';
                         return `
                         <div class="class-item">
                             <div class="class-time">${cls.time}</div>
