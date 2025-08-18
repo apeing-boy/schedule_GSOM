@@ -18,6 +18,7 @@
             color: var(--tg-theme-text-color, #333);
             padding: 20px;
             margin: 0;
+            padding-bottom: 140px; /* Добавлен отступ для FAB кнопок */
         }
         
         .container {
@@ -380,8 +381,71 @@
             font-size: 0.8em;
         }
         
+        /* FAB кнопки - улучшенное позиционирование */
+        .fab-container {
+            position: fixed;
+            right: 16px;
+            bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 999;
+        }
+        
+        .fab {
+            padding: 12px 16px;
+            border-radius: 999px;
+            background: var(--tg-theme-button-color, #0088cc);
+            color: var(--tg-theme-button-text-color, #fff);
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,.15);
+            font-weight: 600;
+            transition: transform 0.2s ease;
+        }
+        
+        .fab:active {
+            transform: scale(0.95);
+        }
+        
+        .fab.danger {
+            background: var(--tg-theme-destructive-text-color, #d9534f);
+        }
+        
+        #electivesModal { 
+            display: none; 
+            position: fixed; 
+            z-index: 2000; 
+            inset: 0; 
+            background: rgba(0,0,0,.4); 
+        }
+        
+        #electivesModal .modal-content { 
+            background: var(--tg-theme-bg-color, #fff); 
+            margin: 5% auto; 
+            padding: 16px; 
+            border-radius: 12px; 
+            width: min(560px, 92%); 
+        }
+        
+        .electives-list { 
+            display: grid; 
+            gap: 8px; 
+            margin: 12px 0; 
+        }
+        
+        .electives-actions { 
+            display: flex; 
+            gap: 8px; 
+            justify-content: flex-end; 
+            margin-top: 12px; 
+        }
+        
         @media (max-width: 768px) {
-            body { padding: 10px; }
+            body { 
+                padding: 10px; 
+                padding-bottom: 140px;
+            }
             .container { padding: 15px; }
             .months-grid { grid-template-columns: 1fr; gap: 15px; }
             .legend { flex-direction: column; gap: 8px; }
@@ -389,23 +453,7 @@
             h1 { font-size: 1.5em; }
             .day { font-size: 0.8em; }
         }
-    
-        .fab {
-            position: fixed;
-            right: 16px; bottom: 16px;
-            padding: 12px 16px;
-            border-radius: 999px;
-            background: var(--tg-theme-button-color, #0088cc);
-            color: var(--tg-theme-button-text-color, #fff);
-            border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.15);
-            font-weight: 600;
-        }
-        #electivesModal { display: none; position: fixed; z-index: 2000; inset: 0; background: rgba(0,0,0,.4); }
-        #electivesModal .modal-content { background: var(--tg-theme-bg-color, #fff); margin: 5% auto; padding: 16px; border-radius: 12px; width: min(560px, 92%); }
-        .electives-list { display: grid; gap: 8px; margin: 12px 0; }
-        .electives-actions { display:flex; gap:8px; justify-content:flex-end; margin-top: 12px; }
     </style>
-    
 </head>
 <body>
     <div class="container">
@@ -683,15 +731,18 @@
         </div>
     </div>
 
-    <button id="resetProfile" class="fab" style="bottom: 72px; background: var(--tg-theme-destructive-text-color, #d9534f);">Сброс профиля</button>
-    <button id="configureElectives" class="fab" style="bottom: 16px;">Элективы</button>
-    
+    <!-- FAB кнопки в контейнере -->
+    <div class="fab-container">
+        <button id="resetProfile" class="fab danger">Сброс профиля</button>
+        <button id="configureElectives" class="fab">Элективы</button>
+    </div>
 
     <script>
         const tg = window.Telegram?.WebApp || null;
         let currentUser = null;
         let notesManager = null;
-        let selectedElectives = new Set(); // Хранилище для выбранных элективов
+        let selectedElectives = new Set();
+        let cs = null; // Глобальная переменная для CloudStorage
         
         if (tg) {
             tg.ready();
@@ -708,7 +759,8 @@
                 throw new Error('Telegram CloudStorage required');
             }
         
-            const cs = {
+            // Инициализация cs глобально
+            cs = {
                 getKeys: () => new Promise((res, rej) => cloud.getKeys((e, k) => e ? rej(e) : res(k || []))),
                 getItem: (key) => new Promise((res, rej) => cloud.getItem(key, (e, v) => e ? rej(e) : res(v ?? ''))),
                 setItem: (key, val) => new Promise((res, rej) => cloud.setItem(key, val, (e) => e ? rej(e) : res())),
@@ -717,7 +769,7 @@
             
             currentUser = tg.initDataUnsafe.user;
             displayUserInfo(currentUser);
-            notesManager = new NotesManager(currentUser.id); // Передаем ID пользователя
+            notesManager = new NotesManager(currentUser.id);
         }
         
         function displayUserInfo(user) {
@@ -733,73 +785,73 @@
         }
 
         const classData = {
-            '2025-09-10': [{ id: '2025-09-10-1', time: '18:00 – 21:15', name: 'Risks and Risk Management', teacher: 'Вукович Д., Лосев К.Р.', format: 'очно' }],
+            '2025-09-10': [{ id: '2025-09-10-1', time: '18:00 – 21:15', name: 'Risks and Risk Management', teacher: 'Букович Д., Лосев К.В.', format: 'очно' }],
             '2025-09-12': [{ id: '2025-09-12-1', time: '18:00 – 21:15', name: 'Banking & Fintech Industry', teacher: 'Дорожкин П.Л.', format: 'очно' }],
             '2025-09-13': [{ id: '2025-09-13-1', time: '10:00 – 13:15', name: 'Banking & Fintech Industry', teacher: 'Дорожкин П.Л.', format: 'очно' }],
             '2025-09-15': [{ id: '2025-09-15-1', time: '18:00 – 19:30', name: 'Banking & Fintech Industry', teacher: 'Дорожкин П.Л.', format: 'онлайн' }],
-            '2025-09-17': [{ id: '2025-09-17-1', time: '18:00 – 21:15', name: 'Risks and Risk Management', teacher: 'Вукович Д., Лосев К.Р.', format: 'очно' }],
-            '2025-09-20': [{ id: '2025-09-20-1', time: '14:15 – 17:30', name: 'Alternative Investments and Portfolio Management', teacher: 'Власов П.Н., Гончарова Г.С.', format: 'очно' }],
+            '2025-09-17': [{ id: '2025-09-17-1', time: '18:00 – 21:15', name: 'Risks and Risk Management', teacher: 'Букович Д., Лосев К.В.', format: 'очно' }],
+            '2025-09-20': [{ id: '2025-09-20-1', time: '14:15 – 17:30', name: 'Alternative Investments and Portfolio Management', teacher: 'Власов П.А., Гончарова Г.С.', format: 'очно' }],
             '2025-09-22': [{ id: '2025-09-22-1', time: '17:15 – 22:00', name: 'Sustainable Finance', teacher: 'Андрианов А.Ю.', format: 'очно' }],
-            '2025-09-24': [{ id: '2025-09-24-1', time: '18:00 – 21:15', name: 'Risks and Risk Management', teacher: 'Вукович Д., Лосев К.Р.', format: 'очно' }],
+            '2025-09-24': [{ id: '2025-09-24-1', time: '18:00 – 21:15', name: 'Risks and Risk Management', teacher: 'Букович Д., Лосев К.В.', format: 'очно' }],
             '2025-09-25': [{ id: '2025-09-25-1', time: '18:00 – 19:30', name: 'Research Seminar III', teacher: 'Смирнов М.В.', format: 'очно' }],
             '2025-09-26': [{ id: '2025-09-26-1', time: '18:00 – 21:15', name: 'Banking & Fintech Industry', teacher: 'Дорожкин П.Л.', format: 'очно' }],
             '2025-09-27': [
                 { id: '2025-09-27-1', time: '10:00 – 13:15', name: 'Banking & Fintech Industry', teacher: 'Дорожкин П.Л.', format: 'очно' },
                 { id: '2025-09-27-2', time: '14:15 – 17:30', name: 'Fixed income and Derivatives', teacher: 'Герасименко А.А.', format: 'онлайн' }
             ],
-            '2025-10-01': [{ id: '2025-10-01-1', time: '18:00 – 21:15', name: 'Risks and Risk Management', teacher: 'Вукович Д., Лосев К.Р.', format: 'очно' }],
+            '2025-10-01': [{ id: '2025-10-01-1', time: '18:00 – 21:15', name: 'Risks and Risk Management', teacher: 'Букович Д., Лосев К.В.', format: 'очно' }],
             '2025-10-02': [{ id: '2025-10-02-1', time: '18:00 – 19:30', name: 'Banking & Fintech Industry', teacher: 'Дорожкин П.Л.', format: 'онлайн' }],
             '2025-10-04': [
                 { id: '2025-10-04-1', time: '10:00 – 13:15', name: 'Fixed income and Derivatives', teacher: 'Герасименко А.А.', format: 'очно' },
-                { id: '2025-10-04-2', time: '14:15 – 17:30', name: 'Alternative Investments and Portfolio Management', teacher: 'Власов П.Н., Гончарова Г.С.', format: 'очно' }
+                { id: '2025-10-04-2', time: '14:15 – 17:30', name: 'Alternative Investments and Portfolio Management', teacher: 'Власов П.А., Гончарова Г.С.', format: 'очно' }
             ],
-            '2025-10-08': [{ id: '2025-10-08-1', time: '18:00 – 21:15', name: 'Risks and Risk Management', teacher: 'Вукович Д., Лосев К.Р.', format: 'очно' }],
+            '2025-10-08': [{ id: '2025-10-08-1', time: '18:00 – 21:15', name: 'Risks and Risk Management', teacher: 'Букович Д., Лосев К.В.', format: 'очно' }],
             '2025-10-09': [{ id: '2025-10-09-1', time: '18:00 – 20:30', name: 'Research Seminar III', teacher: 'Смирнов М.В.', format: 'очно' }],
             '2025-10-10': [{ id: '2025-10-10-1', time: '18:00 – 21:15', name: 'Banking & Fintech Industry', teacher: 'Дорожкин П.Л.', format: 'очно' }],
             '2025-10-11': [
                 { id: '2025-10-11-1', time: '10:00 – 13:15', name: 'Banking & Fintech Industry', teacher: 'Дорожкин П.Л.', format: 'очно' },
-                { id: '2025-10-11-2', time: '14:15 – 17:30', name: 'Alternative Investments and Portfolio Management', teacher: 'Власов П.Н., Гончарова Г.С.', format: 'очно' }
+                { id: '2025-10-11-2', time: '14:15 – 17:30', name: 'Alternative Investments and Portfolio Management', teacher: 'Власов П.А., Гончарова Г.С.', format: 'очно' }
             ],
             '2025-10-13': [{ id: '2025-10-13-1', time: '17:15 – 22:00', name: 'Sustainable Finance', teacher: 'Андрианов А.Ю.', format: 'очно' }],
             '2025-10-18': [
                 { id: '2025-10-18-1', time: '10:00 – 13:15', name: 'Fixed income and Derivatives', teacher: 'Герасименко А.А.', format: 'очно' },
-                { id: '2025-10-18-2', time: '14:15 – 17:30', name: 'Alternative Investments and Portfolio Management', teacher: 'Власов П.Н., Гончарова Г.С.', format: 'очно' }
+                { id: '2025-10-18-2', time: '14:15 – 17:30', name: 'Alternative Investments and Portfolio Management', teacher: 'Власов П.А., Гончарова Г.С.', format: 'очно' }
             ],
             '2025-10-24': [{ id: '2025-10-24-1', time: '18:00 – 21:15', name: 'Banking & Fintech Industry', teacher: 'Дорожкин П.Л.', format: 'онлайн' }],
             '2025-10-25': [
                 { id: '2025-10-25-1', time: '10:00 – 13:15', name: 'Banking & Fintech Industry', teacher: 'Дорожкин П.Л.', format: 'онлайн' },
-                { id: '2025-10-25-2', time: '14:15 – 17:30', name: 'Alternative Investments and Portfolio Management', teacher: 'Власов П.Н., Гончарова Г.С.', format: 'очно' }
+                { id: '2025-10-25-2', time: '14:15 – 17:30', name: 'Alternative Investments and Portfolio Management', teacher: 'Власов П.А., Гончарова Г.С.', format: 'очно' }
             ],
             '2025-10-27': [{ id: '2025-10-27-1', time: '17:15 – 22:00', name: 'Sustainable Finance', teacher: 'Андрианов А.Ю.', format: 'очно' }],
             '2025-10-31': [{ id: '2025-10-31-1', time: '18:00 – 20:30', name: 'Research Seminar III', teacher: 'Смирнов М.В.', format: 'очно' }],
             '2025-11-01': [
                 { id: '2025-11-01-1', time: '10:00 – 13:15', name: 'Fixed income and Derivatives', teacher: 'Герасименко А.А.', format: 'онлайн' },
-                { id: '2025-11-01-2', time: '14:15 – 17:30', name: 'Alternative Investments and Portfolio Management', teacher: 'Власов П.Н., Гончарова Г.С.', format: 'очно' }
+                { id: '2025-11-01-2', time: '14:15 – 17:30', name: 'Alternative Investments and Portfolio Management', teacher: 'Власов П.А., Гончарова Г.С.', format: 'очно' }
             ],
             '2025-11-07': [{ id: '2025-11-07-1', time: '18:00 – 21:15', name: 'Research Seminar III', teacher: 'Смирнов М.В.', format: 'очно' }],
             '2025-11-08': [
                 { id: '2025-11-08-1', time: '10:00 – 13:15', name: 'Fixed income and Derivatives', teacher: 'Герасименко А.А.', format: 'онлайн' },
-                { id: '2025-11-08-2', time: '14:15 – 17:30', name: 'Alternative Investments and Portfolio Management', teacher: 'Власов П.Н., Гончарова Г.С.', format: 'очно' }
+                { id: '2025-11-08-2', time: '14:15 – 17:30', name: 'Alternative Investments and Portfolio Management', teacher: 'Власов П.А., Гончарова Г.С.', format: 'очно' }
             ],
             '2025-11-15': [{ id: '2025-11-15-1', time: '10:00 – 17:30', name: 'Effective Team Management', teacher: 'Земсков О.О.', format: 'очно' }],
             '2025-11-17': [{ id: '2025-11-17-1', time: '17:15 – 22:00', name: 'Sustainable Finance', teacher: 'Андрианов А.Ю.', format: 'очно' }],
             '2025-11-22': [
                 { id: '2025-11-22-1', time: '10:00 – 13:15', name: 'Fixed income and Derivatives', teacher: 'Герасименко А.А.', format: 'очно' },
-                { id: '2025-11-22-2', time: '14:15 – 17:30', name: 'Alternative Investments and Portfolio Management', teacher: 'Власов П.Н., Гончарова Г.С.', format: 'очно' }
+                { id: '2025-11-22-2', time: '14:15 – 17:30', name: 'Alternative Investments and Portfolio Management', teacher: 'Власов П.А., Гончарова Г.С.', format: 'очно' }
             ],
-            '2025-11-25': [{ id: '2025-11-25-1', time: '18:00 – 21:15', name: 'Risks and Risk Management', teacher: 'Вукович Д., Лосев К.Р.', format: 'онлайн' }],
+            '2025-11-25': [{ id: '2025-11-25-1', time: '18:00 – 21:15', name: 'Risks and Risk Management', teacher: 'Букович Д., Лосев К.В.', format: 'онлайн' }],
             '2025-11-28': [{ id: '2025-11-28-1', time: '18:00 – 20:30', name: 'Research Seminar III', teacher: 'Смирнов М.В.', format: 'очно' }],
             '2025-11-29': [{ id: '2025-11-29-1', time: '10:00 – 17:30', name: 'Effective Team Management', teacher: 'Земсков О.О.', format: 'очно' }],
             '2025-12-01': [{ id: '2025-12-01-1', time: '17:15 – 22:00', name: 'Sustainable Finance', teacher: 'Андрианов А.Ю.', format: 'очно' }],
-            '2025-12-02': [{ id: '2025-12-02-1', time: '18:00 – 21:15', name: 'Risks and Risk Management', teacher: 'Вукович Д., Лосев К.Р.', format: 'онлайн' }],
+            '2025-12-02': [{ id: '2025-12-02-1', time: '18:00 – 21:15', name: 'Risks and Risk Management', teacher: 'Букович Д., Лосев К.В.', format: 'онлайн' }],
             '2025-12-06': [{ id: '2025-12-06-1', time: '10:00 – 13:15', name: 'Fixed income and Derivatives', teacher: 'Герасименко А.А.', format: 'очно' }],
-            '2025-12-09': [{ id: '2025-12-09-1', time: '18:00 – 21:15', name: 'Risks and Risk Management', teacher: 'Вукович Д., Лосев К.Р.', format: 'онлайн' }],
+            '2025-12-09': [{ id: '2025-12-09-1', time: '18:00 – 21:15', name: 'Risks and Risk Management', teacher: 'Букович Д., Лосев К.В.', format: 'онлайн' }],
             '2025-12-13': [
                 { id: '2025-12-13-1', time: '10:00 – 13:15', name: 'Fixed income and Derivatives', teacher: 'Герасименко А.А.', format: 'очно' },
-                { id: '2025-12-13-2', time: '14:15 – 17:30', name: 'Alternative Investments and Portfolio Management', teacher: 'Власов П.Н., Гончарова Г.С.', format: 'очно' }
+                { id: '2025-12-13-2', time: '14:15 – 17:30', name: 'Alternative Investments and Portfolio Management', teacher: 'Власов П.А., Гончарова Г.С.', format: 'очно' }
             ],
             '2025-12-15': [{ id: '2025-12-15-1', time: '10:00 – 15:45', name: 'Sustainable Finance', teacher: 'Андрианов А.Ю.', format: 'очно' }],
-            '2025-12-16': [{ id: '2025-12-16-1', time: '18:00 – 21:15', name: 'Risks and Risk Management', teacher: 'Вукович Д., Лосев К.Р.', format: 'онлайн' }],
+            '2025-12-16': [{ id: '2025-12-16-1', time: '18:00 – 21:15', name: 'Risks and Risk Management', teacher: 'Букович Д., Лосев К.В.', format: 'онлайн' }],
             '2025-12-18': [{ id: '2025-12-18-1', time: '18:00 – 22:00', name: 'Research Seminar III', teacher: 'Смирнов М.В.', format: 'очно' }],
             '2025-12-20': [{ id: '2025-12-20-1', time: '10:00 – 13:15', name: 'Fixed income and Derivatives', teacher: 'Герасименко А.А.', format: 'очно' }]
         };
@@ -811,28 +863,44 @@
                 this.notes = {};
                 this.ready = this.init();
             }
+            
             async init() {
-                const keys = await cs.getKeys();
-                const myKeys = keys.filter(k => k.startsWith(this.prefix));
-                const entries = await Promise.all(
-                    myKeys.map(async k => [k.slice(this.prefix.length), await cs.getItem(k)])
-                );
-                this.notes = Object.fromEntries(entries.filter(([, v]) => v && v.length));
-                this.updateNotesDisplay();
+                if (!cs) return; // Проверка наличия cs
+                try {
+                    const keys = await cs.getKeys();
+                    const myKeys = keys.filter(k => k.startsWith(this.prefix));
+                    const entries = await Promise.all(
+                        myKeys.map(async k => [k.slice(this.prefix.length), await cs.getItem(k)])
+                    );
+                    this.notes = Object.fromEntries(entries.filter(([, v]) => v && v.length));
+                    this.updateNotesDisplay();
+                } catch (e) {
+                    console.error('Failed to init notes:', e);
+                }
             }
+            
             async setNote(classId, text) {
+                if (!cs) return; // Проверка наличия cs
                 const value = (text || '').trim();
                 const key = this.prefix + classId;
-                if (value) {
-                    this.notes[classId] = value;
-                    await cs.setItem(key, value);
-                } else {
-                    delete this.notes[classId];
-                    await cs.removeItem(key);
+                try {
+                    if (value) {
+                        this.notes[classId] = value;
+                        await cs.setItem(key, value);
+                    } else {
+                        delete this.notes[classId];
+                        await cs.removeItem(key);
+                    }
+                    this.updateNotesDisplay();
+                } catch (e) {
+                    console.error('Failed to save note:', e);
                 }
-                this.updateNotesDisplay();
             }
-            getNote(classId) { return this.notes[classId] || ''; }
+            
+            getNote(classId) { 
+                return this.notes[classId] || ''; 
+            }
+            
             updateNotesDisplay() {
                 const count = Object.keys(this.notes).length;
                 const el = document.getElementById('notesCount');
@@ -846,7 +914,6 @@
             }
         }
 
-        
         // --- ЭЛЕКТИВЫ (CloudStorage) ---
         const ELECTIVE_NAMES = [
             'Advanced Performance Management',
@@ -873,6 +940,7 @@
         }
 
         async function loadElectives() {
+            if (!cs || !currentUser) return; // Проверка наличия cs и currentUser
             try {
                 const raw = await cs.getItem(`electives:${currentUser.id}`);
                 if (raw) {
@@ -885,7 +953,6 @@
                 }
             } catch (e) {
                 console.warn('Не удалось загрузить элективы:', e);
-                // всё равно позволим выбрать
                 selectedElectives = new Set();
                 buildElectivesUI();
                 showElectivesModal();
@@ -914,6 +981,7 @@
         }
 
         async function saveElectivesToCloud() {
+            if (!cs || !currentUser) return; // Проверка наличия cs и currentUser
             const arr = Array.from(selectedElectives);
             await cs.setItem(`electives:${currentUser.id}`, JSON.stringify(arr));
         }
@@ -922,8 +990,6 @@
             // неэлективные дисциплины показываем всегда
             return classes.filter(c => !isElective(c.name) || selectedElectives.has(c.name));
         }
-        // --- КОНЕЦ БЛОКА ЭЛЕКТИВОВ ---
-    
         
         document.addEventListener('DOMContentLoaded', function() {
             const btnConfig = document.getElementById('configureElectives');
@@ -1066,6 +1132,8 @@
         async function resetProfile() {
             const ok = await confirmPopup('Сбросить выбранные элективы и все заметки? Это действие нельзя отменить.');
             if (!ok) return;
+            if (!cs || !currentUser) return; // Проверка наличия cs и currentUser
+            
             try {
                 const userId = currentUser.id;
                 const keys = await cs.getKeys();
