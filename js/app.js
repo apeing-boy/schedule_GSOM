@@ -24,6 +24,12 @@ let app = {
             return;
         }
         
+        // Debug: Log mandatory vs elective courses
+        const allCourses = [...new Set(Calendar.schedule.map(item => item['Дисциплина']))];
+        const mandatoryCourses = allCourses.filter(course => !Calendar.electives.includes(course));
+        console.log('Обязательные дисциплины:', mandatoryCourses);
+        console.log('Элективные дисциплины:', Calendar.electives);
+        
         // Load saved data from CloudStorage
         try {
             Calendar.selectedElectives = await Storage.loadElectives();
