@@ -174,7 +174,7 @@ async function resetNotes() {
 document.addEventListener('DOMContentLoaded', () => {
     app.init();
     
-    // Load saved theme
+    // Load saved theme or default to light
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
     updateThemeIcon(savedTheme);
@@ -186,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const bottomButtons = document.querySelector('.bottom-buttons');
     const isMobile = window.innerWidth < 768;
     
-    if (isMobile) {
+    if (isMobile && bottomButtons) {
         let lastScrollPosition = 0;
         let scrollTimer = null;
         
@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 lastScrollPosition = scrollPosition;
             }, 100);
         });
-    } else {
+    } else if (bottomButtons) {
         // Always show on desktop
         bottomButtons.classList.add('visible');
     }
@@ -233,7 +233,7 @@ function toggleTheme() {
 function updateThemeIcon(theme) {
     const icon = document.querySelector('.theme-icon');
     if (icon) {
-        icon.textContent = theme === 'light' ? '🌙' : '☀️';
+        icon.textContent = theme === 'dark' ? '☀️' : '🌙';
     }
 }
 
@@ -241,9 +241,9 @@ function updateThemeIcon(theme) {
 async function updateStorageInfo() {
     try {
         const storageInfo = await Storage.getStorageSize();
-        const usedKB = Math.round(storageInfo.used / 1024);
+        const usedKB = Math.ceil(storageInfo.used / 1024) || 0;
         const totalKB = Math.round(storageInfo.total / 1024);
-        const percentage = (storageInfo.used / storageInfo.total) * 100;
+        const percentage = Math.min((storageInfo.used / storageInfo.total) * 100, 100);
         
         const storageText = document.getElementById('storageText');
         const storageFill = document.getElementById('storageFill');
