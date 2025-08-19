@@ -120,6 +120,7 @@ async function saveNotes() {
     try {
         await Storage.saveNotes(Calendar.notes);
         closeDayModal();
+        updateStorageInfo(); // Update storage display
         
         // Show success haptic feedback
         if (window.Telegram?.WebApp?.HapticFeedback) {
@@ -173,6 +174,14 @@ async function resetNotes() {
 document.addEventListener('DOMContentLoaded', () => {
     app.init();
     
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+    
+    // Update storage info
+    updateStorageInfo();
+    
     // Handle bottom buttons visibility on mobile
     const bottomButtons = document.querySelector('.bottom-buttons');
     const isMobile = window.innerWidth < 768;
@@ -204,6 +213,69 @@ document.addEventListener('DOMContentLoaded', () => {
         bottomButtons.classList.add('visible');
     }
 });
+
+// Theme toggle function
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon(newTheme);
+    
+    // Haptic feedback
+    if (window.Telegram?.WebApp?.HapticFeedback) {
+        window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+    }
+}
+
+// Update theme icon
+function updateThemeIcon(theme) {
+    const icon = document.querySelector('.theme-icon');
+    if (icon) {
+        icon.textContent = theme === 'light' ? '🌙' : '☀️';
+    }
+}
+
+// Update storage info display
+async function updateStorageInfo() {
+    try {
+        const storageInfo = await Storage.getStorageSize();
+        const usedKB = Math.round(storageInfo.used / 1024);
+        const totalKB = Math.round(storageInfo.total / 1024);
+        const percentage = (storageInfo.used / storageInfo.total) * 100;
+        
+        const storageText = document.getElementById('storageText');
+        const storageFill = document.getElementById('storageFill');
+        
+        if (storageText) {
+            storageText.textContent = `CloudStorage: ${usedKB} KB / ${totalKB} KB`;
+        }
+        
+        if (storageFill) {
+            storageFill.style.width = `${percentage}%`;
+            
+            // Change color based on usage
+            storageFill.classList.remove('warning', 'danger');
+            if (percentage > 80) {
+                storageFill.classList.add('danger');
+            } else if (percentage > 60) {
+                storageFill.classList.add('warning');
+            }
+        }
+        
+        // Auto-optimize if usage is too high
+        if (percentage > 90) {
+            const removed = await Storage.optimizeNotes(60);
+            if (removed > 0) {
+                console.log(`Optimized: removed ${removed} old notes`);
+                updateStorageInfo();
+            }
+        }
+    } catch (error) {
+        console.error('Error updating storage info:', error);
+    }
+}
 
 // Handle Telegram WebApp theme changes
 if (window.Telegram?.WebApp) {
