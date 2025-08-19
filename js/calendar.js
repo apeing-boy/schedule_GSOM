@@ -176,10 +176,10 @@ const Calendar = {
         const months = new Set();
         this.schedule.forEach(item => {
             const date = this.parseDate(item['Дата']);
-            months.add(`${date.getFullYear()}-${date.getMonth()}`);
+            months.add(`${date.getFullYear()}-${String(date.getMonth()).padStart(2, '0')}`);
         });
         
-        // Sort months
+        // Sort months chronologically
         const sortedMonths = Array.from(months).sort();
         
         // Generate calendar for each month
