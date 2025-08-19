@@ -218,10 +218,23 @@
             border-top: 1px solid var(--tg-theme-hint-color, #e0e0e0);
             display: flex;
             gap: 10px;
+            transition: transform 0.3s ease;
+            transform: translateY(100%);
+        }
+
+        .bottom-buttons.visible {
+            transform: translateY(0);
         }
 
         .bottom-buttons .btn {
             flex: 1;
+        }
+
+        /* Always show buttons on desktop */
+        @media (min-width: 768px) {
+            .bottom-buttons {
+                transform: translateY(0);
+            }
         }
 
         .loading {
