@@ -182,11 +182,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update storage info
     updateStorageInfo();
     
-    // Handle bottom buttons visibility on mobile
+    // Handle bottom buttons and storage info visibility on mobile
     const bottomButtons = document.querySelector('.bottom-buttons');
+    const storageInfo = document.querySelector('.storage-info');
     const isMobile = window.innerWidth < 768;
     
-    if (isMobile && bottomButtons) {
+    if (isMobile && bottomButtons && storageInfo) {
         let lastScrollPosition = 0;
         let scrollTimer = null;
         
@@ -200,17 +201,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (documentHeight - scrollPosition < threshold) {
                     bottomButtons.classList.add('visible');
+                    storageInfo.classList.add('visible');
                 } else if (scrollPosition < lastScrollPosition) {
                     // Hide when scrolling up
                     bottomButtons.classList.remove('visible');
+                    storageInfo.classList.remove('visible');
                 }
                 
                 lastScrollPosition = scrollPosition;
             }, 100);
         });
-    } else if (bottomButtons) {
+    } else {
         // Always show on desktop
-        bottomButtons.classList.add('visible');
+        if (bottomButtons) bottomButtons.classList.add('visible');
+        if (storageInfo) storageInfo.classList.add('visible');
     }
 });
 
