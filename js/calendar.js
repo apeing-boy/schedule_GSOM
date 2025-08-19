@@ -53,9 +53,11 @@ const Calendar = {
             
             // Check if it's an elective
             if (this.electives.includes(item['Дисциплина'])) {
+                // Show only if selected
                 return this.selectedElectives.includes(item['Дисциплина']);
             }
             
+            // It's a mandatory course, always show
             return true;
         });
     },
@@ -66,7 +68,7 @@ const Calendar = {
         
         if (classes.length === 0) return 'offline';
         
-        const hasInPerson = classes.some(c => c['Формат'] === 'очная');
+        const hasInPerson = classes.some(c => c['Формат'] === 'очная' || c['Формат'] === '');
         const hasOnline = classes.some(c => c['Формат'] === 'онлайн');
         
         if (hasInPerson) return 'in-person';
@@ -150,7 +152,7 @@ const Calendar = {
                 <div class="class-title">${cls['Дисциплина']}</div>
                 <div class="class-info">
                     ${cls['Время']} | ${cls['Преподаватель']}<br>
-                    ${cls['Формат'] === 'очная' ? `Ауд. ${cls['Ауд.']}` : 'Онлайн'}
+                    ${cls['Формат'] === 'онлайн' ? 'Онлайн' : `Ауд. ${cls['Ауд.'] || 'не указана'}`}
                 </div>
                 <textarea 
                     class="note-input" 
