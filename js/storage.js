@@ -111,5 +111,49 @@ const Storage = {
     // Clear selected electives
     async clearElectives() {
         return this.remove(this.ELECTIVES_KEY);
+    },
+
+    // Calculate storage size
+    async getStorageSize() {
+        try {
+            const [electives, notes] = await Promise.all([
+                this.load(this.ELECTIVES_KEY),
+                this.load(this.NOTES_KEY)
+            ]);
+            
+            const electivesSize = electives ? JSON.stringify(electives).length : 0;
+            const notesSize = notes ? JSON.stringify(notes).length : 0;
+            
+            return {
+                used: electivesSize + notesSize,
+                total: 1024 * 1024, // 1MB limit for CloudStorage
+                electivesSize,
+                notesSize
+            };
+        } catch (error) {
+            console.error('Error calculating storage:', error);
+            return { used: 0, total: 1024 * 1024 };
+        }
+    },
+
+    // Optimize notes storage (remove old notes)
+    async optimizeNotes(daysToKeep = 90) {
+        const notes = await this.loadNotes();
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);
+        
+        const optimizedNotes = {};
+        Object.keys(notes).forEach(key => {
+            const [dateStr] = key.split('_');
+            const [month, day, year] = dateStr.split('/').map(n => parseInt(n));
+            const noteDate = new Date(year, month - 1, day);
+            
+            if (noteDate >= cutoffDate) {
+                optimizedNotes[key] = notes[key];
+            }
+        });
+        
+        await this.saveNotes(optimizedNotes);
+        return Object.keys(notes).length - Object.keys(optimizedNotes).length;
     }
 };
