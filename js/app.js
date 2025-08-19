@@ -172,6 +172,37 @@ async function resetNotes() {
 // Initialize app when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     app.init();
+    
+    // Handle bottom buttons visibility on mobile
+    const bottomButtons = document.querySelector('.bottom-buttons');
+    const isMobile = window.innerWidth < 768;
+    
+    if (isMobile) {
+        let lastScrollPosition = 0;
+        let scrollTimer = null;
+        
+        window.addEventListener('scroll', () => {
+            clearTimeout(scrollTimer);
+            
+            scrollTimer = setTimeout(() => {
+                const scrollPosition = window.scrollY + window.innerHeight;
+                const documentHeight = document.documentElement.scrollHeight;
+                const threshold = 50; // pixels from bottom
+                
+                if (documentHeight - scrollPosition < threshold) {
+                    bottomButtons.classList.add('visible');
+                } else if (scrollPosition < lastScrollPosition) {
+                    // Hide when scrolling up
+                    bottomButtons.classList.remove('visible');
+                }
+                
+                lastScrollPosition = scrollPosition;
+            }, 100);
+        });
+    } else {
+        // Always show on desktop
+        bottomButtons.classList.add('visible');
+    }
 });
 
 // Handle Telegram WebApp theme changes
