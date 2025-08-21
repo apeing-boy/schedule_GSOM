@@ -5,6 +5,8 @@ const Storage = {
     // Keys for CloudStorage
     ELECTIVES_KEY: 'selected_electives',
     NOTES_KEY: 'class_notes',
+    TASKS_KEY: 'user_tasks',
+    TASKS_KEY: 'user_tasks',
 
     // Initialize Telegram WebApp
     init() {
@@ -111,6 +113,38 @@ const Storage = {
     // Clear selected electives
     async clearElectives() {
         return this.remove(this.ELECTIVES_KEY);
+    },
+
+    // Save user tasks
+    async saveUserTasks(tasks) {
+        return this.save(this.TASKS_KEY, tasks);
+    },
+
+    // Load user tasks
+    async loadUserTasks() {
+        const tasks = await this.load(this.TASKS_KEY);
+        return tasks || {};
+    },
+
+    // Clear user tasks
+    async clearUserTasks() {
+        return this.remove(this.TASKS_KEY);
+    },
+
+    // Save user tasks
+    async saveUserTasks(tasks) {
+        return this.save(this.TASKS_KEY, tasks);
+    },
+
+    // Load user tasks
+    async loadUserTasks() {
+        const tasks = await this.load(this.TASKS_KEY);
+        return tasks || {};
+    },
+
+    // Clear user tasks
+    async clearUserTasks() {
+        return this.remove(this.TASKS_KEY);
     },
 
     // Calculate storage size

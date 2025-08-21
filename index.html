@@ -161,6 +161,29 @@
             color: white;
         }
 
+        .day-cell.has-tasks {
+            background: #9c27b0;
+            color: white;
+        }
+
+        .btn-delete {
+            background: transparent;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 4px;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .btn-delete:hover {
+            opacity: 1;
+        }
+
+        .task-item {
+            border-left: 3px solid #9c27b0;
+        }
+
         .day-cell:active:not(.empty) {
             transform: scale(0.95);
         }
@@ -402,8 +425,12 @@
             <span>Онлайн</span>
         </div>
         <div class="legend-item">
+            <div class="legend-dot" style="background: #9c27b0;"></div>
+            <span>Мои дела</span>
+        </div>
+        <div class="legend-item">
             <div class="legend-dot" style="background: #4caf50;"></div>
-            <span>Нет занятий</span>
+            <span>Свободно</span>
         </div>
     </div>
 

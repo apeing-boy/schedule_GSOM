@@ -6,6 +6,8 @@ const Calendar = {
     electives: [],
     selectedElectives: [],
     notes: {},
+    userTasks: {}, // Format: { 'MM/DD/YYYY': [{title: '', time: '', note: ''}] }
+    userTasks: {}, // Format: { 'MM/DD/YYYY': [{title: '', time: '', note: ''}] }
     
     months: [
         'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
@@ -44,7 +46,7 @@ const Calendar = {
         return new Date(year, month - 1, day);
     },
     
-    // Get classes for a specific date
+    // Get classes and tasks for a specific date
     getClassesForDate(date) {
         const dateStr = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
         
@@ -62,17 +64,25 @@ const Calendar = {
         });
     },
     
+    // Get user tasks for a specific date
+    getUserTasksForDate(date) {
+        const dateStr = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+        return this.userTasks[dateStr] || [];
+    },
+    
     // Determine day type (offline, online, in-person)
     getDayType(date) {
         const classes = this.getClassesForDate(date);
+        const tasks = this.getUserTasksForDate(date);
         
-        if (classes.length === 0) return 'offline';
+        if (classes.length === 0 && tasks.length === 0) return 'offline';
         
         const hasInPerson = classes.some(c => c['Формат'] === 'очная' || c['Формат'] === '');
         const hasOnline = classes.some(c => c['Формат'] === 'онлайн');
         
         if (hasInPerson) return 'in-person';
         if (hasOnline) return 'online';
+        if (tasks.length > 0) return 'has-tasks'; // New type for days with only user tasks
         return 'offline';
     },
     
@@ -120,9 +130,8 @@ const Calendar = {
             dayDiv.textContent = day;
             dayDiv.dataset.date = `${year}-${month}-${day}`;
             
-            if (dayType !== 'offline') {
-                dayDiv.onclick = () => this.showDaySchedule(date);
-            }
+            // All days are clickable now
+            dayDiv.onclick = () => this.showDaySchedule(date);
             
             grid.appendChild(dayDiv);
         }
@@ -134,13 +143,25 @@ const Calendar = {
     // Show schedule for a specific day
     showDaySchedule(date) {
         const classes = this.getClassesForDate(date);
+        const tasks = this.getUserTasksForDate(date);
         const modal = document.getElementById('dayModal');
         const header = document.getElementById('dayModalHeader');
         const body = document.getElementById('dayModalBody');
         
+        const dateStr = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
         header.textContent = `${date.getDate()} ${this.months[date.getMonth()]} ${date.getFullYear()}`;
         body.innerHTML = '';
         
+        // Add button to create new task
+        const addTaskBtn = document.createElement('button');
+        addTaskBtn.className = 'btn btn-primary';
+        addTaskBtn.style.marginBottom = '15px';
+        addTaskBtn.style.width = '100%';
+        addTaskBtn.textContent = '➕ Добавить дело';
+        addTaskBtn.onclick = () => this.addUserTask(dateStr);
+        body.appendChild(addTaskBtn);
+        
+        // Show classes
         classes.forEach(cls => {
             const classDiv = document.createElement('div');
             classDiv.className = 'class-item';
@@ -166,7 +187,72 @@ const Calendar = {
             body.appendChild(classDiv);
         });
         
+        // Show user tasks
+        tasks.forEach((task, index) => {
+            const taskDiv = document.createElement('div');
+            taskDiv.className = 'class-item task-item';
+            
+            const taskKey = `task_${dateStr}_${index}`;
+            
+            taskDiv.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="class-title" style="color: var(--button-bg);">📌 ${task.title}</div>
+                    <button class="btn-delete" onclick="Calendar.deleteUserTask('${dateStr}', ${index})">🗑️</button>
+                </div>
+                <div class="class-info">
+                    ${task.time || 'Время не указано'}
+                </div>
+                <textarea 
+                    class="note-input" 
+                    placeholder="Добавить заметку (до 512 символов)"
+                    maxlength="512"
+                    data-task-key="${taskKey}"
+                    data-task-date="${dateStr}"
+                    data-task-index="${index}"
+                    rows="2"
+                >${task.note || ''}</textarea>
+            `;
+            
+            body.appendChild(taskDiv);
+        });
+        
         modal.classList.add('active');
+    },
+    
+    // Add new user task
+    addUserTask(dateStr) {
+        const title = prompt('Название дела:');
+        if (!title) return;
+        
+        const time = prompt('Время (необязательно):') || '';
+        
+        if (!this.userTasks[dateStr]) {
+            this.userTasks[dateStr] = [];
+        }
+        
+        this.userTasks[dateStr].push({
+            title: title,
+            time: time,
+            note: ''
+        });
+        
+        // Save and refresh
+        Storage.saveUserTasks(this.userTasks);
+        this.showDaySchedule(this.parseDate(dateStr));
+        this.render();
+    },
+    
+    // Delete user task
+    deleteUserTask(dateStr, index) {
+        if (confirm('Удалить это дело?')) {
+            this.userTasks[dateStr].splice(index, 1);
+            if (this.userTasks[dateStr].length === 0) {
+                delete this.userTasks[dateStr];
+            }
+            Storage.saveUserTasks(this.userTasks);
+            this.showDaySchedule(this.parseDate(dateStr));
+            this.render();
+        }
     },
     
     // Render the calendar
