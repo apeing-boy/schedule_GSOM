@@ -34,6 +34,7 @@ let app = {
         try {
             Calendar.selectedElectives = await Storage.loadElectives();
             Calendar.notes = await Storage.loadNotes();
+            Calendar.userTasks = await Storage.loadUserTasks();
         } catch (error) {
             console.error('Error loading saved data:', error);
         }
@@ -107,9 +108,21 @@ async function saveNotes() {
     
     noteInputs.forEach(input => {
         const key = input.dataset.noteKey;
-        const value = input.value.trim();
-        if (value) {
-            newNotes[key] = value;
+        const taskKey = input.dataset.taskKey;
+        
+        if (key) {
+            // Regular class note
+            const value = input.value.trim();
+            if (value) {
+                newNotes[key] = value;
+            }
+        } else if (taskKey) {
+            // Task note - update directly in userTasks
+            const dateStr = input.dataset.taskDate;
+            const index = parseInt(input.dataset.taskIndex);
+            if (Calendar.userTasks[dateStr] && Calendar.userTasks[dateStr][index]) {
+                Calendar.userTasks[dateStr][index].note = input.value.trim();
+            }
         }
     });
     
@@ -125,6 +138,7 @@ async function saveNotes() {
     
     try {
         await Storage.saveNotes(Calendar.notes);
+        await Storage.saveUserTasks(Calendar.userTasks);
         closeDayModal();
         updateStorageInfo(); // Update storage display
         
