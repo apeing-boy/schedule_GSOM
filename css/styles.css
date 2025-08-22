@@ -170,6 +170,17 @@ body {
     transform: scale(0.95);
 }
 
+.day-cell.past-day {
+    opacity: 0.4;
+    filter: grayscale(50%);
+}
+
+.day-cell.current-day {
+    font-weight: bold;
+    border: 3px solid var(--text-color);
+    box-shadow: 0 0 0 1px var(--bg-color);
+}
+
 .modal {
     display: none;
     position: fixed;

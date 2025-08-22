@@ -126,7 +126,21 @@ const Calendar = {
             const dayDiv = document.createElement('div');
             const dayType = this.getDayType(date);
             
-            dayDiv.className = `day-cell ${dayType}`;
+            let className = `day-cell ${dayType}`;
+            
+            // Add classes for past days and current day
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Reset time for comparison
+            const currentDate = new Date(date);
+            currentDate.setHours(0, 0, 0, 0);
+            
+            if (currentDate < today) {
+                className += ' past-day';
+            } else if (currentDate.getTime() === today.getTime()) {
+                className += ' current-day';
+            }
+            
+            dayDiv.className = className;
             dayDiv.textContent = day;
             dayDiv.dataset.date = `${year}-${month}-${day}`;
             
@@ -260,21 +274,20 @@ const Calendar = {
         const container = document.getElementById('calendarContainer');
         container.innerHTML = '';
         
-        // Get unique months from schedule
-        const months = new Set();
-        this.schedule.forEach(item => {
-            const date = this.parseDate(item['Дата']);
-            months.add(`${date.getFullYear()}-${String(date.getMonth()).padStart(2, '0')}`);
-        });
+        // Generate months from current month to end of 2026
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth();
         
-        // Sort months chronologically
-        const sortedMonths = Array.from(months).sort();
-        
-        // Generate calendar for each month
-        sortedMonths.forEach(monthKey => {
-            const [year, month] = monthKey.split('-').map(n => parseInt(n));
-            const monthDiv = this.generateMonth(year, month);
-            container.appendChild(monthDiv);
-        });
+        // Start from current month and go to December 2026
+        for (let year = currentYear; year <= 2026; year++) {
+            const startMonth = (year === currentYear) ? currentMonth : 0;
+            const endMonth = 11; // December
+            
+            for (let month = startMonth; month <= endMonth; month++) {
+                const monthDiv = this.generateMonth(year, month);
+                container.appendChild(monthDiv);
+            }
+        }
     }
 };
