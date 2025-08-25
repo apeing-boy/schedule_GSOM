@@ -161,8 +161,8 @@ const Calendar = {
             dayNumber.textContent = day;
             dayContent.appendChild(dayNumber);
             
-            // Add activity icons if there are multiple activities
-            if (dayTypeData.activities.length > 1) {
+            // Add activity icons if there are any activities
+            if (dayTypeData.activities.length > 0) {
                 const iconsDiv = document.createElement('div');
                 iconsDiv.className = 'day-icons';
                 
