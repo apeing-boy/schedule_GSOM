@@ -284,7 +284,35 @@ const Calendar = {
         const title = prompt('Название дела:');
         if (!title) return;
         
-        const time = prompt('Время (необязательно):') || '';
+        // Ask if user wants to specify time
+        const needTime = confirm('Указать время для этого дела?');
+        let time = '';
+        
+        if (needTime) {
+            let timeInput;
+            let attempts = 0;
+            const maxAttempts = 3;
+            
+            while (attempts < maxAttempts) {
+                timeInput = prompt(`Введите время (примеры: 14:30, 2:30, 14.30, 2.30 дня, пол третьего, четверть седьмого):`);
+                
+                if (timeInput === null) return; // User cancelled
+                
+                const parsedTime = this.parseTimeInput(timeInput);
+                
+                if (parsedTime.valid) {
+                    time = parsedTime.formatted;
+                    break;
+                } else {
+                    attempts++;
+                    if (attempts < maxAttempts) {
+                        alert(`Не удалось понять время "${timeInput}". Попробуйте ещё раз.\n\nПримеры: 14:30, 2 дня, пол третьего, четверть седьмого, 9 утра`);
+                    } else {
+                        alert('Превышено количество попыток. Дело будет добавлено без времени.');
+                    }
+                }
+            }
+        }
         
         if (!this.userTasks[dateStr]) {
             this.userTasks[dateStr] = [];
@@ -300,6 +328,115 @@ const Calendar = {
         Storage.saveUserTasks(this.userTasks);
         this.showDaySchedule(this.parseDate(dateStr));
         this.render();
+    },
+    
+    // Parse time input in various formats
+    parseTimeInput(input) {
+        if (!input || input.trim() === '') {
+            return { valid: false };
+        }
+        
+        const text = input.toLowerCase().trim();
+        
+        // Standard formats: HH:MM, HH.MM, H:MM, H.MM
+        const standardTime = text.match(/^(\d{1,2})[:.](\d{2})$/);
+        if (standardTime) {
+            const hours = parseInt(standardTime[1]);
+            const minutes = parseInt(standardTime[2]);
+            if (hours <= 23 && minutes <= 59) {
+                return { valid: true, formatted: `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}` };
+            }
+        }
+        
+        // Time with AM/PM indicators (утра, дня, вечера, ночи)
+        const timeWithPeriod = text.match(/^(\d{1,2})(?:[:.](\d{2}))?\s*(утра|дня|вечера|ночи)$/);
+        if (timeWithPeriod) {
+            let hours = parseInt(timeWithPeriod[1]);
+            const minutes = timeWithPeriod[2] ? parseInt(timeWithPeriod[2]) : 0;
+            const period = timeWithPeriod[3];
+            
+            if (period === 'дня' && hours <= 12) hours += 12;
+            if (period === 'вечера' && hours <= 12) hours += 12;
+            if ((period === 'ночи' || period === 'утра') && hours === 12) hours = 0;
+            
+            if (hours <= 23 && minutes <= 59) {
+                return { valid: true, formatted: `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}` };
+            }
+        }
+        
+        // Fractional hours (пол, четверть, три четверти)
+        const fractionalHours = {
+            'пол': 30,
+            'половина': 30,
+            'четверть': 15,
+            'три четверти': 45,
+            'сорок пять': 45
+        };
+        
+        for (const [fraction, minutes] of Object.entries(fractionalHours)) {
+            const pattern = new RegExp(`^${fraction}\\s+(\\w+)$`);
+            const match = text.match(pattern);
+            if (match) {
+                const hourWord = match[1];
+                const hourNum = this.parseHourWord(hourWord);
+                if (hourNum !== null) {
+                    let totalMinutes = (hourNum * 60) + minutes;
+                    if (totalMinutes >= 24 * 60) totalMinutes -= 24 * 60;
+                    const h = Math.floor(totalMinutes / 60);
+                    const m = totalMinutes % 60;
+                    return { valid: true, formatted: `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}` };
+                }
+            }
+        }
+        
+        // Hour words (два, три, четыре и т.д.)
+        const hourWord = this.parseHourWord(text);
+        if (hourWord !== null) {
+            return { valid: true, formatted: `${hourWord.toString().padStart(2, '0')}:00` };
+        }
+        
+        // Just numbers (assume hours)
+        const numberOnly = text.match(/^\d{1,2}$/);
+        if (numberOnly) {
+            const hours = parseInt(numberOnly[0]);
+            if (hours <= 23) {
+                return { valid: true, formatted: `${hours.toString().padStart(2, '0')}:00` };
+            }
+        }
+        
+        return { valid: false };
+    },
+    
+    // Parse hour words (один, два, три, etc.)
+    parseHourWord(word) {
+        const hourWords = {
+            'ноль': 0, 'нуль': 0,
+            'один': 1, 'одного': 1, 'первого': 1,
+            'два': 2, 'двух': 2, 'второго': 2,
+            'три': 3, 'трех': 3, 'третьего': 3,
+            'четыре': 4, 'четырех': 4, 'четвертого': 4,
+            'пять': 5, 'пяти': 5, 'пятого': 5,
+            'шесть': 6, 'шести': 6, 'шестого': 6,
+            'семь': 7, 'семи': 7, 'седьмого': 7,
+            'восемь': 8, 'восьми': 8, 'восьмого': 8,
+            'девять': 9, 'девяти': 9, 'девятого': 9,
+            'десять': 10, 'десяти': 10, 'десятого': 10,
+            'одиннадцать': 11, 'одиннадцати': 11, 'одиннадцатого': 11,
+            'двенадцать': 12, 'двенадцати': 12, 'двенадцатого': 12,
+            'тринадцать': 13, 'тринадцати': 13, 'тринадцатого': 13,
+            'четырнадцать': 14, 'четырнадцати': 14, 'четырнадцатого': 14,
+            'пятнадцать': 15, 'пятнадцати': 15, 'пятнадцатого': 15,
+            'шестнадцать': 16, 'шестнадцати': 16, 'шестнадцатого': 16,
+            'семнадцать': 17, 'семнадцати': 17, 'семнадцатого': 17,
+            'восемнадцать': 18, 'восемнадцати': 18, 'восемнадцатого': 18,
+            'девятнадцать': 19, 'девятнадцати': 19, 'девятнадцатого': 19,
+            'двадцать': 20, 'двадцати': 20, 'двадцатого': 20,
+            'двадцать один': 21, 'двадцать первого': 21,
+            'двадцать два': 22, 'двадцать второго': 22,
+            'двадцать три': 23, 'двадцать третьего': 23
+        };
+        
+        return hourWords[word.toLowerCase()] || null;
     },
     
     // Delete user task
