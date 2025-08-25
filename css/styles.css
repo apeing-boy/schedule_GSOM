@@ -178,22 +178,22 @@ body {
 }
 
 .day-cell.offline {
-    background: #4caf50;
+    background: #81c784;
     color: white;
 }
 
 .day-cell.online {
-    background: #ff9800;
+    background: #ffb74d;
     color: white;
 }
 
 .day-cell.in-person {
-    background: #f44336;
+    background: #e57373;
     color: white;
 }
 
 .day-cell.has-tasks {
-    background: #9c27b0;
+    background: #ba68c8;
     color: white;
 }
 
