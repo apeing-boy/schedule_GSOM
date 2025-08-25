@@ -70,20 +70,29 @@ const Calendar = {
         return this.userTasks[dateStr] || [];
     },
     
-    // Determine day type (offline, online, in-person)
+    // Determine day type and activities (offline, online, in-person, tasks)
     getDayType(date) {
         const classes = this.getClassesForDate(date);
         const tasks = this.getUserTasksForDate(date);
         
-        if (classes.length === 0 && tasks.length === 0) return 'offline';
+        if (classes.length === 0 && tasks.length === 0) return { primary: 'offline', activities: [] };
         
         const hasInPerson = classes.some(c => c['Формат'] === 'очная' || c['Формат'] === '');
         const hasOnline = classes.some(c => c['Формат'] === 'онлайн');
+        const hasTasks = tasks.length > 0;
         
-        if (hasInPerson) return 'in-person';
-        if (hasOnline) return 'online';
-        if (tasks.length > 0) return 'has-tasks'; // New type for days with only user tasks
-        return 'offline';
+        const activities = [];
+        if (hasInPerson) activities.push('in-person');
+        if (hasOnline) activities.push('online');
+        if (hasTasks) activities.push('has-tasks');
+        
+        // Determine primary color by priority: in-person > online > tasks
+        let primary = 'offline';
+        if (hasInPerson) primary = 'in-person';
+        else if (hasOnline) primary = 'online';
+        else if (hasTasks) primary = 'has-tasks';
+        
+        return { primary, activities };
     },
     
     // Generate calendar for a month
@@ -124,9 +133,9 @@ const Calendar = {
         for (let day = 1; day <= lastDay.getDate(); day++) {
             const date = new Date(year, month, day);
             const dayDiv = document.createElement('div');
-            const dayType = this.getDayType(date);
+            const dayTypeData = this.getDayType(date);
             
-            let className = `day-cell ${dayType}`;
+            let className = `day-cell ${dayTypeData.primary}`;
             
             // Add classes for past days and current day
             const today = new Date();
@@ -141,8 +150,45 @@ const Calendar = {
             }
             
             dayDiv.className = className;
-            dayDiv.textContent = day;
             dayDiv.dataset.date = `${year}-${month}-${day}`;
+            
+            // Create day content with number and icons
+            const dayContent = document.createElement('div');
+            dayContent.className = 'day-content';
+            
+            const dayNumber = document.createElement('div');
+            dayNumber.className = 'day-number';
+            dayNumber.textContent = day;
+            dayContent.appendChild(dayNumber);
+            
+            // Add activity icons if there are multiple activities
+            if (dayTypeData.activities.length > 1) {
+                const iconsDiv = document.createElement('div');
+                iconsDiv.className = 'day-icons';
+                
+                dayTypeData.activities.forEach(activity => {
+                    const icon = document.createElement('span');
+                    icon.className = `activity-icon ${activity}`;
+                    
+                    switch (activity) {
+                        case 'in-person':
+                            icon.textContent = '🏛️';
+                            break;
+                        case 'online':
+                            icon.textContent = '💻';
+                            break;
+                        case 'has-tasks':
+                            icon.textContent = '📌';
+                            break;
+                    }
+                    
+                    iconsDiv.appendChild(icon);
+                });
+                
+                dayContent.appendChild(iconsDiv);
+            }
+            
+            dayDiv.appendChild(dayContent);
             
             // All days are clickable now
             dayDiv.onclick = () => this.showDaySchedule(date);
