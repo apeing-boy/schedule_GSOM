@@ -284,32 +284,34 @@ const Calendar = {
         const title = prompt('Название дела:');
         if (!title) return;
         
-        // Ask if user wants to specify time
-        const needTime = confirm('Указать время для этого дела?');
+        let timeInput;
+        let attempts = 0;
+        const maxAttempts = 3;
         let time = '';
         
-        if (needTime) {
-            let timeInput;
-            let attempts = 0;
-            const maxAttempts = 3;
+        while (attempts < maxAttempts) {
+            timeInput = prompt(`Введите время (оставьте пустым, если не нужно):\n\nПримеры: 14:30, 18:00-19:30, 2 дня, пол третьего, четверть седьмого, с 9 до 11, около 15:00`);
             
-            while (attempts < maxAttempts) {
-                timeInput = prompt(`Введите время (примеры: 14:30, 2:30, 14.30, 2.30 дня, пол третьего, четверть седьмого):`);
-                
-                if (timeInput === null) return; // User cancelled
-                
-                const parsedTime = this.parseTimeInput(timeInput);
-                
-                if (parsedTime.valid) {
-                    time = parsedTime.formatted;
-                    break;
+            if (timeInput === null) return; // User cancelled
+            
+            // Handle empty input as no time
+            if (!timeInput || timeInput.trim() === '') {
+                time = '';
+                break;
+            }
+            
+            const parsedTime = this.parseTimeInput(timeInput);
+            
+            if (parsedTime.valid) {
+                time = parsedTime.formatted;
+                break;
+            } else {
+                attempts++;
+                if (attempts < maxAttempts) {
+                    alert(`Не удалось понять время "${timeInput}". Попробуйте ещё раз.\n\nПримеры:\n• 14:30, 18.00\n• 18:00-19:30, с 9 до 11\n• 2 дня, 8 вечера\n• пол третьего, четверть седьмого\n• около 15:00, примерно в 9`);
                 } else {
-                    attempts++;
-                    if (attempts < maxAttempts) {
-                        alert(`Не удалось понять время "${timeInput}". Попробуйте ещё раз.\n\nПримеры: 14:30, 2 дня, пол третьего, четверть седьмого, 9 утра`);
-                    } else {
-                        alert('Превышено количество попыток. Дело будет добавлено без времени.');
-                    }
+                    alert('Превышено количество попыток. Дело будет добавлено без времени.');
+                    time = '';
                 }
             }
         }
@@ -338,73 +340,137 @@ const Calendar = {
         
         const text = input.toLowerCase().trim();
         
+        // Remove common prefixes/suffixes
+        const cleanText = text
+            .replace(/^(около|примерно|приблизительно|где-то|в)\s+/, '')
+            .replace(/\s+(часов|ч\.|ч)$/, '');
+        
+        // Time ranges: 18:00-19:30, с 9 до 11, 14.30-15.45
+        const rangeFormats = [
+            /^(\d{1,2}[:.]?\d{0,2})\s*[-–—]\s*(\d{1,2}[:.]?\d{0,2})$/,
+            /^с\s+(\d{1,2}(?:[:.]?\d{0,2})?)\s+до\s+(\d{1,2}(?:[:.]?\d{0,2})?)$/,
+            /^от\s+(\d{1,2}(?:[:.]?\d{0,2})?)\s+до\s+(\d{1,2}(?:[:.]?\d{0,2})?)$/
+        ];
+        
+        for (const rangePattern of rangeFormats) {
+            const rangeMatch = cleanText.match(rangePattern);
+            if (rangeMatch) {
+                const start = this.parseTimeSegment(rangeMatch[1]);
+                const end = this.parseTimeSegment(rangeMatch[2]);
+                if (start && end) {
+                    return { valid: true, formatted: `${start}–${end}` };
+                }
+            }
+        }
+        
+        // Single time formats
+        const singleTime = this.parseSingleTime(cleanText);
+        if (singleTime) {
+            return { valid: true, formatted: singleTime };
+        }
+        
+        return { valid: false };
+    },
+    
+    // Parse single time segment
+    parseTimeSegment(timeStr) {
+        const text = timeStr.trim();
+        
+        // Standard formats: HH:MM, HH.MM, H:MM, H.MM, HH, H
+        const standardTime = text.match(/^(\d{1,2})(?:[:.](\d{2}))?$/);
+        if (standardTime) {
+            const hours = parseInt(standardTime[1]);
+            const minutes = standardTime[2] ? parseInt(standardTime[2]) : 0;
+            if (hours <= 23 && minutes <= 59) {
+                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            }
+        }
+        
+        return null;
+    },
+    
+    // Parse single time with all formats
+    parseSingleTime(text) {
         // Standard formats: HH:MM, HH.MM, H:MM, H.MM
         const standardTime = text.match(/^(\d{1,2})[:.](\d{2})$/);
         if (standardTime) {
             const hours = parseInt(standardTime[1]);
             const minutes = parseInt(standardTime[2]);
             if (hours <= 23 && minutes <= 59) {
-                return { valid: true, formatted: `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}` };
+                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
             }
         }
         
         // Time with AM/PM indicators (утра, дня, вечера, ночи)
-        const timeWithPeriod = text.match(/^(\d{1,2})(?:[:.](\d{2}))?\s*(утра|дня|вечера|ночи)$/);
+        const timeWithPeriod = text.match(/^(\d{1,2})(?:[:.](\d{2}))?\s*(утра|утром|дня|днем|вечера|вечером|ночи|ночью)$/);
         if (timeWithPeriod) {
             let hours = parseInt(timeWithPeriod[1]);
             const minutes = timeWithPeriod[2] ? parseInt(timeWithPeriod[2]) : 0;
             const period = timeWithPeriod[3];
             
-            if (period === 'дня' && hours <= 12) hours += 12;
-            if (period === 'вечера' && hours <= 12) hours += 12;
-            if ((period === 'ночи' || period === 'утра') && hours === 12) hours = 0;
+            if ((period === 'дня' || period === 'днем') && hours <= 12) hours += 12;
+            if ((period === 'вечера' || period === 'вечером') && hours <= 12) hours += 12;
+            if ((period === 'ночи' || period === 'ночью' || period === 'утра' || period === 'утром') && hours === 12) hours = 0;
             
             if (hours <= 23 && minutes <= 59) {
-                return { valid: true, formatted: `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}` };
+                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
             }
         }
         
         // Fractional hours (пол, четверть, три четверти)
         const fractionalHours = {
-            'пол': 30,
-            'половина': 30,
-            'четверть': 15,
-            'три четверти': 45,
-            'сорок пять': 45
+            'пол': 30, 'половина': 30, 'полвина': 30,
+            'четверть': 15, 'четвертина': 15,
+            'три четверти': 45, 'сорок пять': 45, '45': 45
         };
         
         for (const [fraction, minutes] of Object.entries(fractionalHours)) {
-            const pattern = new RegExp(`^${fraction}\\s+(\\w+)$`);
-            const match = text.match(pattern);
-            if (match) {
-                const hourWord = match[1];
-                const hourNum = this.parseHourWord(hourWord);
-                if (hourNum !== null) {
-                    let totalMinutes = (hourNum * 60) + minutes;
-                    if (totalMinutes >= 24 * 60) totalMinutes -= 24 * 60;
-                    const h = Math.floor(totalMinutes / 60);
-                    const m = totalMinutes % 60;
-                    return { valid: true, formatted: `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}` };
+            const patterns = [
+                new RegExp(`^${fraction}\\s+(\\w+(?:\\s+\\w+)?)$`),
+                new RegExp(`^в\\s+${fraction}\\s+(\\w+(?:\\s+\\w+)?)$`)
+            ];
+            
+            for (const pattern of patterns) {
+                const match = text.match(pattern);
+                if (match) {
+                    const hourWord = match[1];
+                    const hourNum = this.parseHourWord(hourWord);
+                    if (hourNum !== null) {
+                        let totalMinutes = (hourNum * 60) + minutes;
+                        if (totalMinutes >= 24 * 60) totalMinutes -= 24 * 60;
+                        const h = Math.floor(totalMinutes / 60);
+                        const m = totalMinutes % 60;
+                        return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+                    }
                 }
+            }
+        }
+        
+        // Hour words with "в" (в два, в семь)
+        const hourWordWithPrep = text.match(/^в\s+(\w+(?:\s+\w+)?)$/);
+        if (hourWordWithPrep) {
+            const hourNum = this.parseHourWord(hourWordWithPrep[1]);
+            if (hourNum !== null) {
+                return `${hourNum.toString().padStart(2, '0')}:00`;
             }
         }
         
         // Hour words (два, три, четыре и т.д.)
         const hourWord = this.parseHourWord(text);
         if (hourWord !== null) {
-            return { valid: true, formatted: `${hourWord.toString().padStart(2, '0')}:00` };
+            return `${hourWord.toString().padStart(2, '0')}:00`;
         }
         
         // Just numbers (assume hours)
-        const numberOnly = text.match(/^\d{1,2}$/);
+        const numberOnly = text.match(/^(\d{1,2})$/);
         if (numberOnly) {
-            const hours = parseInt(numberOnly[0]);
+            const hours = parseInt(numberOnly[1]);
             if (hours <= 23) {
-                return { valid: true, formatted: `${hours.toString().padStart(2, '0')}:00` };
+                return `${hours.toString().padStart(2, '0')}:00`;
             }
         }
         
-        return { valid: false };
+        return null;
     },
     
     // Parse hour words (один, два, три, etc.)
