@@ -122,6 +122,55 @@ body {
     cursor: pointer;
     transition: all 0.2s;
     position: relative;
+    padding: 2px;
+}
+
+.day-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    padding: 2px 0;
+}
+
+.day-number {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.day-icons {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.activity-icon {
+    font-size: 12px;
+    line-height: 1;
+    opacity: 0.95;
+    text-shadow: 0 0 2px rgba(0,0,0,0.4);
+}
+
+/* Special layout for days with activities */
+.day-cell:not(.offline) .day-content {
+    justify-content: flex-start;
+    gap: 1px;
+}
+
+.day-cell:not(.offline) .day-number {
+    margin-top: 1px;
+}
+
+.day-cell:not(.offline) .day-icons {
+    margin-top: auto;
+    margin-bottom: 1px;
 }
 
 .day-cell.empty {
@@ -129,22 +178,22 @@ body {
 }
 
 .day-cell.offline {
-    background: #4caf50;
+    background: #81c784;
     color: white;
 }
 
 .day-cell.online {
-    background: #ff9800;
+    background: #ffb74d;
     color: white;
 }
 
 .day-cell.in-person {
-    background: #f44336;
+    background: #e57373;
     color: white;
 }
 
 .day-cell.has-tasks {
-    background: #9c27b0;
+    background: #ba68c8;
     color: white;
 }
 
@@ -168,6 +217,17 @@ body {
 
 .day-cell:active:not(.empty) {
     transform: scale(0.95);
+}
+
+.day-cell.past-day {
+    opacity: 0.4;
+    filter: grayscale(50%);
+}
+
+.day-cell.current-day {
+    font-weight: bold;
+    border: 3px solid var(--text-color);
+    box-shadow: 0 0 0 1px var(--bg-color);
 }
 
 .modal {
