@@ -6,7 +6,6 @@ const Storage = {
     ELECTIVES_KEY: 'selected_electives',
     NOTES_KEY: 'class_notes',
     TASKS_KEY: 'user_tasks',
-    TASKS_KEY: 'user_tasks',
 
     // Initialize Telegram WebApp
     init() {
@@ -131,38 +130,25 @@ const Storage = {
         return this.remove(this.TASKS_KEY);
     },
 
-    // Save user tasks
-    async saveUserTasks(tasks) {
-        return this.save(this.TASKS_KEY, tasks);
-    },
-
-    // Load user tasks
-    async loadUserTasks() {
-        const tasks = await this.load(this.TASKS_KEY);
-        return tasks || {};
-    },
-
-    // Clear user tasks
-    async clearUserTasks() {
-        return this.remove(this.TASKS_KEY);
-    },
-
     // Calculate storage size
     async getStorageSize() {
         try {
-            const [electives, notes] = await Promise.all([
+            const [electives, notes, tasks] = await Promise.all([
                 this.load(this.ELECTIVES_KEY),
-                this.load(this.NOTES_KEY)
+                this.load(this.NOTES_KEY),
+                this.load(this.TASKS_KEY)
             ]);
             
             const electivesSize = electives ? JSON.stringify(electives).length : 0;
             const notesSize = notes ? JSON.stringify(notes).length : 0;
+            const tasksSize = tasks ? JSON.stringify(tasks).length : 0;
             
             return {
-                used: electivesSize + notesSize,
+                used: electivesSize + notesSize + tasksSize,
                 total: 1024 * 1024, // 1MB limit for CloudStorage
                 electivesSize,
-                notesSize
+                notesSize,
+                tasksSize
             };
         } catch (error) {
             console.error('Error calculating storage:', error);

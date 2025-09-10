@@ -7,7 +7,6 @@ const Calendar = {
     selectedElectives: [],
     notes: {},
     userTasks: {}, // Format: { 'MM/DD/YYYY': [{title: '', time: '', note: ''}] }
-    userTasks: {}, // Format: { 'MM/DD/YYYY': [{title: '', time: '', note: ''}] }
     
     months: [
         'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
@@ -247,26 +246,25 @@ const Calendar = {
             body.appendChild(classDiv);
         });
         
-        // Show user tasks
+        // Show user tasks with DELETE BUTTON
         tasks.forEach((task, index) => {
             const taskDiv = document.createElement('div');
             taskDiv.className = 'class-item task-item';
             
-            const taskKey = `task_${dateStr}_${index}`;
-            
             taskDiv.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div class="class-title" style="color: var(--button-bg);">📌 ${task.title}</div>
-                    <button class="btn-delete" onclick="Calendar.deleteUserTask('${dateStr}', ${index})">🗑️</button>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                    <div class="class-title" style="color: var(--button-bg); flex: 1;">📌 ${task.title}</div>
+                    <button class="btn-delete" onclick="Calendar.deleteUserTask('${dateStr}', ${index})" title="Удалить дело" style="margin-left: 10px; font-size: 18px; color: #f44336;">
+                        🗑️
+                    </button>
                 </div>
-                <div class="class-info">
+                <div class="class-info" style="margin-bottom: 8px;">
                     ${task.time || 'Время не указано'}
                 </div>
                 <textarea 
                     class="note-input" 
                     placeholder="Добавить заметку (до 512 символов)"
                     maxlength="512"
-                    data-task-key="${taskKey}"
                     data-task-date="${dateStr}"
                     data-task-index="${index}"
                     rows="2"
@@ -276,13 +274,19 @@ const Calendar = {
             body.appendChild(taskDiv);
         });
         
+        if (tasks.length === 0 && classes.length === 0) {
+            const noDataDiv = document.createElement('div');
+            noDataDiv.innerHTML = '<p style="text-align: center; color: var(--hint-color); margin: 20px 0;">Нет занятий и дел на этот день</p>';
+            body.appendChild(noDataDiv);
+        }
+        
         modal.classList.add('active');
     },
     
     // Add new user task
     addUserTask(dateStr) {
         const title = prompt('Название дела:');
-        if (!title) return;
+        if (!title || !title.trim()) return;
         
         let timeInput;
         let attempts = 0;
@@ -321,7 +325,7 @@ const Calendar = {
         }
         
         this.userTasks[dateStr].push({
-            title: title,
+            title: title.trim(),
             time: time,
             note: ''
         });
@@ -505,16 +509,35 @@ const Calendar = {
         return hourWords[word.toLowerCase()] || null;
     },
     
-    // Delete user task
+    // Delete user task - УЛУЧШЕННАЯ ФУНКЦИЯ УДАЛЕНИЯ
     deleteUserTask(dateStr, index) {
-        if (confirm('Удалить это дело?')) {
+        const task = this.userTasks[dateStr] && this.userTasks[dateStr][index];
+        if (!task) {
+            alert('Дело не найдено!');
+            return;
+        }
+        
+        const confirmText = `Удалить дело "${task.title}"?${task.time ? ` (${task.time})` : ''}`;
+        
+        if (confirm(confirmText)) {
             this.userTasks[dateStr].splice(index, 1);
+            
+            // Remove the date entry if no tasks left
             if (this.userTasks[dateStr].length === 0) {
                 delete this.userTasks[dateStr];
             }
+            
+            // Save changes
             Storage.saveUserTasks(this.userTasks);
+            
+            // Refresh the display
             this.showDaySchedule(this.parseDate(dateStr));
             this.render();
+            
+            // Haptic feedback if available
+            if (window.Telegram?.WebApp?.HapticFeedback) {
+                window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+            }
         }
     },
     
