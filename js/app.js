@@ -34,7 +34,6 @@ let app = {
         try {
             Calendar.selectedElectives = await Storage.loadElectives();
             Calendar.notes = await Storage.loadNotes();
-            Calendar.userTasks = await Storage.loadUserTasks();
         } catch (error) {
             console.error('Error loading saved data:', error);
         }
@@ -194,20 +193,11 @@ async function resetNotes() {
 document.addEventListener('DOMContentLoaded', () => {
     app.init();
     
-    // Load saved theme or default to light
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    updateThemeIcon(savedTheme);
-    
-    // Update storage info
-    updateStorageInfo();
-    
-    // Handle bottom buttons and storage info visibility on mobile
+    // Handle bottom buttons visibility on mobile
     const bottomButtons = document.querySelector('.bottom-buttons');
-    const storageInfo = document.querySelector('.storage-info');
     const isMobile = window.innerWidth < 768;
     
-    if (isMobile && bottomButtons && storageInfo) {
+    if (isMobile) {
         let lastScrollPosition = 0;
         let scrollTimer = null;
         
@@ -221,11 +211,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (documentHeight - scrollPosition < threshold) {
                     bottomButtons.classList.add('visible');
-                    storageInfo.classList.add('visible');
                 } else if (scrollPosition < lastScrollPosition) {
                     // Hide when scrolling up
                     bottomButtons.classList.remove('visible');
-                    storageInfo.classList.remove('visible');
                 }
                 
                 lastScrollPosition = scrollPosition;
@@ -233,73 +221,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     } else {
         // Always show on desktop
-        if (bottomButtons) bottomButtons.classList.add('visible');
-        if (storageInfo) storageInfo.classList.add('visible');
+        bottomButtons.classList.add('visible');
     }
 });
-
-// Theme toggle function
-function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-    
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-    updateThemeIcon(newTheme);
-    
-    // Haptic feedback
-    if (window.Telegram?.WebApp?.HapticFeedback) {
-        window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
-    }
-}
-
-// Update theme icon
-function updateThemeIcon(theme) {
-    const icon = document.querySelector('.theme-icon');
-    if (icon) {
-        icon.textContent = theme === 'dark' ? '☀️' : '🌙';
-    }
-}
-
-// Update storage info display
-async function updateStorageInfo() {
-    try {
-        const storageInfo = await Storage.getStorageSize();
-        const usedKB = Math.ceil(storageInfo.used / 1024) || 0;
-        const totalKB = Math.round(storageInfo.total / 1024);
-        const percentage = Math.min((storageInfo.used / storageInfo.total) * 100, 100);
-        
-        const storageText = document.getElementById('storageText');
-        const storageFill = document.getElementById('storageFill');
-        
-        if (storageText) {
-            storageText.textContent = `CloudStorage: ${usedKB} KB / ${totalKB} KB`;
-        }
-        
-        if (storageFill) {
-            storageFill.style.width = `${percentage}%`;
-            
-            // Change color based on usage
-            storageFill.classList.remove('warning', 'danger');
-            if (percentage > 80) {
-                storageFill.classList.add('danger');
-            } else if (percentage > 60) {
-                storageFill.classList.add('warning');
-            }
-        }
-        
-        // Auto-optimize if usage is too high
-        if (percentage > 90) {
-            const removed = await Storage.optimizeNotes(60);
-            if (removed > 0) {
-                console.log(`Optimized: removed ${removed} old notes`);
-                updateStorageInfo();
-            }
-        }
-    } catch (error) {
-        console.error('Error updating storage info:', error);
-    }
-}
 
 // Handle Telegram WebApp theme changes
 if (window.Telegram?.WebApp) {
