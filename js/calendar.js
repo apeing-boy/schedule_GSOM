@@ -1,6 +1,4 @@
-// js/calendar.js
-// Calendar functionality
-
+// js/calendar.js - ПОЛНАЯ РАБОЧАЯ ВЕРСИЯ
 const Calendar = {
     schedule: [],
     electives: [],
@@ -246,20 +244,24 @@ const Calendar = {
             body.appendChild(classDiv);
         });
         
-        // Show user tasks with DELETE BUTTON
+        // Show user tasks
         tasks.forEach((task, index) => {
             const taskDiv = document.createElement('div');
             taskDiv.className = 'class-item task-item';
             
             taskDiv.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                    <div class="class-title" style="color: var(--button-bg); flex: 1;">📌 ${task.title}</div>
-                    <button class="btn-delete" onclick="Calendar.deleteUserTask('${dateStr}', ${index})" title="Удалить дело" style="margin-left: 10px; font-size: 18px; color: #f44336;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div style="flex: 1; margin-right: 10px;">
+                        <div class="class-title" style="color: var(--button-bg);">📌 ${task.title}</div>
+                        <div class="class-info">${task.time || 'Время не указано'}</div>
+                    </div>
+                    <button onclick="Calendar.deleteUserTask('${dateStr}', ${index})" 
+                            style="background: none; border: none; font-size: 18px; color: #f44336; cursor: pointer; padding: 4px; opacity: 0.8;"
+                            onmouseover="this.style.opacity='1'; this.style.transform='scale(1.1)'"
+                            onmouseout="this.style.opacity='0.8'; this.style.transform='scale(1)'"
+                            title="Удалить дело">
                         🗑️
                     </button>
-                </div>
-                <div class="class-info" style="margin-bottom: 8px;">
-                    ${task.time || 'Время не указано'}
                 </div>
                 <textarea 
                     class="note-input" 
@@ -274,58 +276,22 @@ const Calendar = {
             body.appendChild(taskDiv);
         });
         
-        if (tasks.length === 0 && classes.length === 0) {
-            const noDataDiv = document.createElement('div');
-            noDataDiv.innerHTML = '<p style="text-align: center; color: var(--hint-color); margin: 20px 0;">Нет занятий и дел на этот день</p>';
-            body.appendChild(noDataDiv);
-        }
-        
         modal.classList.add('active');
     },
     
     // Add new user task
     addUserTask(dateStr) {
         const title = prompt('Название дела:');
-        if (!title || !title.trim()) return;
+        if (!title) return;
         
-        let timeInput;
-        let attempts = 0;
-        const maxAttempts = 3;
-        let time = '';
-        
-        while (attempts < maxAttempts) {
-            timeInput = prompt(`Введите время (оставьте пустым, если не нужно):\n\nПримеры: 14:30, 18:00-19:30, 2 дня, пол третьего, четверть седьмого, с 9 до 11, около 15:00`);
-            
-            if (timeInput === null) return; // User cancelled
-            
-            // Handle empty input as no time
-            if (!timeInput || timeInput.trim() === '') {
-                time = '';
-                break;
-            }
-            
-            const parsedTime = this.parseTimeInput(timeInput);
-            
-            if (parsedTime.valid) {
-                time = parsedTime.formatted;
-                break;
-            } else {
-                attempts++;
-                if (attempts < maxAttempts) {
-                    alert(`Не удалось понять время "${timeInput}". Попробуйте ещё раз.\n\nПримеры:\n• 14:30, 18.00\n• 18:00-19:30, с 9 до 11\n• 2 дня, 8 вечера\n• пол третьего, четверть седьмого\n• около 15:00, примерно в 9`);
-                } else {
-                    alert('Превышено количество попыток. Дело будет добавлено без времени.');
-                    time = '';
-                }
-            }
-        }
+        const time = prompt('Время (необязательно):') || '';
         
         if (!this.userTasks[dateStr]) {
             this.userTasks[dateStr] = [];
         }
         
         this.userTasks[dateStr].push({
-            title: title.trim(),
+            title: title,
             time: time,
             note: ''
         });
@@ -336,208 +302,16 @@ const Calendar = {
         this.render();
     },
     
-    // Parse time input in various formats
-    parseTimeInput(input) {
-        if (!input || input.trim() === '') {
-            return { valid: false };
-        }
-        
-        const text = input.toLowerCase().trim();
-        
-        // Remove common prefixes/suffixes
-        const cleanText = text
-            .replace(/^(около|примерно|приблизительно|где-то|в)\s+/, '')
-            .replace(/\s+(часов|ч\.|ч)$/, '');
-        
-        // Time ranges: 18:00-19:30, с 9 до 11, 14.30-15.45
-        const rangeFormats = [
-            /^(\d{1,2}[:.]?\d{0,2})\s*[-–—]\s*(\d{1,2}[:.]?\d{0,2})$/,
-            /^с\s+(\d{1,2}(?:[:.]?\d{0,2})?)\s+до\s+(\d{1,2}(?:[:.]?\d{0,2})?)$/,
-            /^от\s+(\d{1,2}(?:[:.]?\d{0,2})?)\s+до\s+(\d{1,2}(?:[:.]?\d{0,2})?)$/
-        ];
-        
-        for (const rangePattern of rangeFormats) {
-            const rangeMatch = cleanText.match(rangePattern);
-            if (rangeMatch) {
-                const start = this.parseTimeSegment(rangeMatch[1]);
-                const end = this.parseTimeSegment(rangeMatch[2]);
-                if (start && end) {
-                    return { valid: true, formatted: `${start}–${end}` };
-                }
-            }
-        }
-        
-        // Single time formats
-        const singleTime = this.parseSingleTime(cleanText);
-        if (singleTime) {
-            return { valid: true, formatted: singleTime };
-        }
-        
-        return { valid: false };
-    },
-    
-    // Parse single time segment
-    parseTimeSegment(timeStr) {
-        const text = timeStr.trim();
-        
-        // Standard formats: HH:MM, HH.MM, H:MM, H.MM, HH, H
-        const standardTime = text.match(/^(\d{1,2})(?:[:.](\d{2}))?$/);
-        if (standardTime) {
-            const hours = parseInt(standardTime[1]);
-            const minutes = standardTime[2] ? parseInt(standardTime[2]) : 0;
-            if (hours <= 23 && minutes <= 59) {
-                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-            }
-        }
-        
-        return null;
-    },
-    
-    // Parse single time with all formats
-    parseSingleTime(text) {
-        // Standard formats: HH:MM, HH.MM, H:MM, H.MM
-        const standardTime = text.match(/^(\d{1,2})[:.](\d{2})$/);
-        if (standardTime) {
-            const hours = parseInt(standardTime[1]);
-            const minutes = parseInt(standardTime[2]);
-            if (hours <= 23 && minutes <= 59) {
-                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-            }
-        }
-        
-        // Time with AM/PM indicators (утра, дня, вечера, ночи)
-        const timeWithPeriod = text.match(/^(\d{1,2})(?:[:.](\d{2}))?\s*(утра|утром|дня|днем|вечера|вечером|ночи|ночью)$/);
-        if (timeWithPeriod) {
-            let hours = parseInt(timeWithPeriod[1]);
-            const minutes = timeWithPeriod[2] ? parseInt(timeWithPeriod[2]) : 0;
-            const period = timeWithPeriod[3];
-            
-            if ((period === 'дня' || period === 'днем') && hours <= 12) hours += 12;
-            if ((period === 'вечера' || period === 'вечером') && hours <= 12) hours += 12;
-            if ((period === 'ночи' || period === 'ночью' || period === 'утра' || period === 'утром') && hours === 12) hours = 0;
-            
-            if (hours <= 23 && minutes <= 59) {
-                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-            }
-        }
-        
-        // Fractional hours (пол, четверть, три четверти)
-        const fractionalHours = {
-            'пол': 30, 'половина': 30, 'полвина': 30,
-            'четверть': 15, 'четвертина': 15,
-            'три четверти': 45, 'сорок пять': 45, '45': 45
-        };
-        
-        for (const [fraction, minutes] of Object.entries(fractionalHours)) {
-            const patterns = [
-                new RegExp(`^${fraction}\\s+(\\w+(?:\\s+\\w+)?)$`),
-                new RegExp(`^в\\s+${fraction}\\s+(\\w+(?:\\s+\\w+)?)$`)
-            ];
-            
-            for (const pattern of patterns) {
-                const match = text.match(pattern);
-                if (match) {
-                    const hourWord = match[1];
-                    const hourNum = this.parseHourWord(hourWord);
-                    if (hourNum !== null) {
-                        let totalMinutes = (hourNum * 60) + minutes;
-                        if (totalMinutes >= 24 * 60) totalMinutes -= 24 * 60;
-                        const h = Math.floor(totalMinutes / 60);
-                        const m = totalMinutes % 60;
-                        return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-                    }
-                }
-            }
-        }
-        
-        // Hour words with "в" (в два, в семь)
-        const hourWordWithPrep = text.match(/^в\s+(\w+(?:\s+\w+)?)$/);
-        if (hourWordWithPrep) {
-            const hourNum = this.parseHourWord(hourWordWithPrep[1]);
-            if (hourNum !== null) {
-                return `${hourNum.toString().padStart(2, '0')}:00`;
-            }
-        }
-        
-        // Hour words (два, три, четыре и т.д.)
-        const hourWord = this.parseHourWord(text);
-        if (hourWord !== null) {
-            return `${hourWord.toString().padStart(2, '0')}:00`;
-        }
-        
-        // Just numbers (assume hours)
-        const numberOnly = text.match(/^(\d{1,2})$/);
-        if (numberOnly) {
-            const hours = parseInt(numberOnly[1]);
-            if (hours <= 23) {
-                return `${hours.toString().padStart(2, '0')}:00`;
-            }
-        }
-        
-        return null;
-    },
-    
-    // Parse hour words (один, два, три, etc.)
-    parseHourWord(word) {
-        const hourWords = {
-            'ноль': 0, 'нуль': 0,
-            'один': 1, 'одного': 1, 'первого': 1,
-            'два': 2, 'двух': 2, 'второго': 2,
-            'три': 3, 'трех': 3, 'третьего': 3,
-            'четыре': 4, 'четырех': 4, 'четвертого': 4,
-            'пять': 5, 'пяти': 5, 'пятого': 5,
-            'шесть': 6, 'шести': 6, 'шестого': 6,
-            'семь': 7, 'семи': 7, 'седьмого': 7,
-            'восемь': 8, 'восьми': 8, 'восьмого': 8,
-            'девять': 9, 'девяти': 9, 'девятого': 9,
-            'десять': 10, 'десяти': 10, 'десятого': 10,
-            'одиннадцать': 11, 'одиннадцати': 11, 'одиннадцатого': 11,
-            'двенадцать': 12, 'двенадцати': 12, 'двенадцатого': 12,
-            'тринадцать': 13, 'тринадцати': 13, 'тринадцатого': 13,
-            'четырнадцать': 14, 'четырнадцати': 14, 'четырнадцатого': 14,
-            'пятнадцать': 15, 'пятнадцати': 15, 'пятнадцатого': 15,
-            'шестнадцать': 16, 'шестнадцати': 16, 'шестнадцатого': 16,
-            'семнадцать': 17, 'семнадцати': 17, 'семнадцатого': 17,
-            'восемнадцать': 18, 'восемнадцати': 18, 'восемнадцатого': 18,
-            'девятнадцать': 19, 'девятнадцати': 19, 'девятнадцатого': 19,
-            'двадцать': 20, 'двадцати': 20, 'двадцатого': 20,
-            'двадцать один': 21, 'двадцать первого': 21,
-            'двадцать два': 22, 'двадцать второго': 22,
-            'двадцать три': 23, 'двадцать третьего': 23
-        };
-        
-        return hourWords[word.toLowerCase()] || null;
-    },
-    
-    // Delete user task - УЛУЧШЕННАЯ ФУНКЦИЯ УДАЛЕНИЯ
+    // Delete user task
     deleteUserTask(dateStr, index) {
-        const task = this.userTasks[dateStr] && this.userTasks[dateStr][index];
-        if (!task) {
-            alert('Дело не найдено!');
-            return;
-        }
-        
-        const confirmText = `Удалить дело "${task.title}"?${task.time ? ` (${task.time})` : ''}`;
-        
-        if (confirm(confirmText)) {
+        if (confirm('Удалить это дело?')) {
             this.userTasks[dateStr].splice(index, 1);
-            
-            // Remove the date entry if no tasks left
             if (this.userTasks[dateStr].length === 0) {
                 delete this.userTasks[dateStr];
             }
-            
-            // Save changes
             Storage.saveUserTasks(this.userTasks);
-            
-            // Refresh the display
             this.showDaySchedule(this.parseDate(dateStr));
             this.render();
-            
-            // Haptic feedback if available
-            if (window.Telegram?.WebApp?.HapticFeedback) {
-                window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-            }
         }
     },
     
