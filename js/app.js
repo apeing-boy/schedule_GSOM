@@ -101,27 +101,27 @@ function closeDayModal() {
     document.getElementById('dayModal').classList.remove('active');
 }
 
-// Save notes for classes
+// Save notes for classes - УЛУЧШЕННАЯ ФУНКЦИЯ
 async function saveNotes() {
     const noteInputs = document.querySelectorAll('.note-input');
     const newNotes = {};
     
     noteInputs.forEach(input => {
-        const key = input.dataset.noteKey;
-        const taskKey = input.dataset.taskKey;
+        const noteKey = input.dataset.noteKey; // для обычных занятий
+        const taskDate = input.dataset.taskDate; // для пользовательских задач
+        const taskIndex = input.dataset.taskIndex; // индекс задачи
         
-        if (key) {
+        if (noteKey) {
             // Regular class note
             const value = input.value.trim();
             if (value) {
-                newNotes[key] = value;
+                newNotes[noteKey] = value;
             }
-        } else if (taskKey) {
+        } else if (taskDate && taskIndex !== undefined) {
             // Task note - update directly in userTasks
-            const dateStr = input.dataset.taskDate;
-            const index = parseInt(input.dataset.taskIndex);
-            if (Calendar.userTasks[dateStr] && Calendar.userTasks[dateStr][index]) {
-                Calendar.userTasks[dateStr][index].note = input.value.trim();
+            const index = parseInt(taskIndex);
+            if (Calendar.userTasks[taskDate] && Calendar.userTasks[taskDate][index]) {
+                Calendar.userTasks[taskDate][index].note = input.value.trim();
             }
         }
     });
@@ -131,7 +131,7 @@ async function saveNotes() {
     
     // Remove empty notes
     Object.keys(Calendar.notes).forEach(key => {
-        if (!Calendar.notes[key]) {
+        if (!Calendar.notes[key] || Calendar.notes[key].trim() === '') {
             delete Calendar.notes[key];
         }
     });
@@ -146,9 +146,16 @@ async function saveNotes() {
         if (window.Telegram?.WebApp?.HapticFeedback) {
             window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
         }
+        
+        console.log('Notes and tasks saved successfully');
     } catch (error) {
         console.error('Error saving notes:', error);
         alert('Ошибка сохранения заметок');
+        
+        // Error haptic feedback
+        if (window.Telegram?.WebApp?.HapticFeedback) {
+            window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+        }
     }
 }
 
@@ -186,6 +193,33 @@ async function resetNotes() {
         } catch (error) {
             console.error('Error resetting notes:', error);
             alert('Ошибка удаления заметок');
+        }
+    }
+}
+
+// Reset all user tasks - НОВАЯ ФУНКЦИЯ
+async function resetUserTasks() {
+    const taskCount = Object.values(Calendar.userTasks).reduce((total, tasks) => total + tasks.length, 0);
+    
+    if (taskCount === 0) {
+        alert('У вас нет личных дел для удаления.');
+        return;
+    }
+    
+    if (confirm(`Вы уверены, что хотите удалить все личные дела? (${taskCount} дел)\nЭто действие нельзя отменить.`)) {
+        try {
+            await Storage.clearUserTasks();
+            Calendar.userTasks = {};
+            Calendar.render(); // Перерисовать календарь
+            alert(`Удалено ${taskCount} личных дел`);
+            
+            // Haptic feedback
+            if (window.Telegram?.WebApp?.HapticFeedback) {
+                window.Telegram.WebApp.HapticFeedback.notificationOccurred('warning');
+            }
+        } catch (error) {
+            console.error('Error resetting user tasks:', error);
+            alert('Ошибка удаления личных дел');
         }
     }
 }
