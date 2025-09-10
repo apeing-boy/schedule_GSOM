@@ -1,5 +1,6 @@
 // js/calendar.js
 // Calendar functionality
+//lol
 
 const Calendar = {
     schedule: [],
