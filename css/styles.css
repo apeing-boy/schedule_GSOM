@@ -122,55 +122,6 @@ body {
     cursor: pointer;
     transition: all 0.2s;
     position: relative;
-    padding: 2px;
-}
-
-.day-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    height: 100%;
-    position: relative;
-    padding: 2px 0;
-}
-
-.day-number {
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 1;
-    flex-shrink: 0;
-}
-
-.day-icons {
-    display: flex;
-    gap: 2px;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.activity-icon {
-    font-size: 12px;
-    line-height: 1;
-    opacity: 0.95;
-    text-shadow: 0 0 2px rgba(0,0,0,0.4);
-}
-
-/* Special layout for days with activities */
-.day-cell:not(.offline) .day-content {
-    justify-content: flex-start;
-    gap: 1px;
-}
-
-.day-cell:not(.offline) .day-number {
-    margin-top: 1px;
-}
-
-.day-cell:not(.offline) .day-icons {
-    margin-top: auto;
-    margin-bottom: 1px;
 }
 
 .day-cell.empty {
@@ -178,38 +129,45 @@ body {
 }
 
 .day-cell.offline {
-    background: #81c784;
+    background: #4caf50;
     color: white;
 }
 
 .day-cell.online {
-    background: #ffb74d;
+    background: #ff9800;
     color: white;
 }
 
 .day-cell.in-person {
-    background: #e57373;
+    background: #f44336;
     color: white;
 }
 
 .day-cell.has-tasks {
-    background: #ba68c8;
+    background: #9c27b0;
     color: white;
+}
+
+.btn-delete {
+    background: transparent;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.btn-delete:hover {
+    opacity: 1;
+}
+
+.task-item {
+    border-left: 3px solid #9c27b0;
 }
 
 .day-cell:active:not(.empty) {
     transform: scale(0.95);
-}
-
-.day-cell.past-day {
-    opacity: 0.4;
-    filter: grayscale(50%);
-}
-
-.day-cell.current-day {
-    font-weight: bold;
-    border: 3px solid var(--text-color);
-    box-shadow: 0 0 0 1px var(--bg-color);
 }
 
 .modal {
@@ -428,97 +386,4 @@ body {
 
 .storage-fill.danger {
     background: #f44336;
-}
-
-/* СТИЛИ ДЛЯ КНОПКИ УДАЛЕНИЯ */
-.btn-delete {
-    background: transparent;
-    border: 2px solid transparent;
-    font-size: 18px;
-    cursor: pointer;
-    padding: 6px;
-    opacity: 0.8;
-    transition: all 0.2s ease;
-    border-radius: 6px;
-    color: #f44336;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 32px;
-    height: 32px;
-    flex-shrink: 0;
-}
-
-.btn-delete:hover {
-    opacity: 1;
-    background: rgba(244, 67, 54, 0.1);
-    border-color: rgba(244, 67, 54, 0.3);
-    transform: scale(1.1);
-}
-
-.btn-delete:active {
-    transform: scale(0.95);
-    background: rgba(244, 67, 54, 0.2);
-}
-
-/* Улучшенные стили для user task элементов */
-.task-item {
-    border-left: 3px solid #9c27b0;
-    position: relative;
-}
-
-.task-item .class-title {
-    padding-right: 45px; /* оставляем место для кнопки */
-}
-
-/* Анимация для появления кнопки удаления */
-@keyframes fadeInScale {
-    0% {
-        opacity: 0;
-        transform: scale(0.5);
-    }
-    100% {
-        opacity: 0.8;
-        transform: scale(1);
-    }
-}
-
-.btn-delete {
-    animation: fadeInScale 0.3s ease-out;
-}
-
-/* Responsive улучшения для мобильных устройств */
-@media (max-width: 768px) {
-    .btn-delete {
-        font-size: 20px;
-        min-width: 36px;
-        height: 36px;
-        padding: 8px;
-    }
-    
-    .btn-delete:hover {
-        transform: none; /* отключаем hover эффекты на мобильных */
-    }
-    
-    .btn-delete:active {
-        transform: scale(0.9);
-        background: rgba(244, 67, 54, 0.3);
-    }
-}
-
-/* Стили для подтверждения удаления (визуальная обратная связь) */
-.task-item.deleting {
-    opacity: 0.5;
-    transform: scale(0.95);
-    transition: all 0.3s ease;
-}
-
-/* Улучшенная видимость на темной теме */
-[data-theme="dark"] .btn-delete {
-    color: #ff6b6b;
-}
-
-[data-theme="dark"] .btn-delete:hover {
-    background: rgba(255, 107, 107, 0.15);
-    border-color: rgba(255, 107, 107, 0.4);
 }
