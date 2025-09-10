@@ -5,6 +5,8 @@ const Storage = {
     // Keys for CloudStorage
     ELECTIVES_KEY: 'selected_electives',
     NOTES_KEY: 'class_notes',
+    TASKS_KEY: 'user_tasks',
+    TASKS_KEY: 'user_tasks',
 
     // Initialize Telegram WebApp
     init() {
