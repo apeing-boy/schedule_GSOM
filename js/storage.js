@@ -133,22 +133,19 @@ const Storage = {
     // Calculate storage size
     async getStorageSize() {
         try {
-            const [electives, notes, tasks] = await Promise.all([
+            const [electives, notes] = await Promise.all([
                 this.load(this.ELECTIVES_KEY),
-                this.load(this.NOTES_KEY),
-                this.load(this.TASKS_KEY)
+                this.load(this.NOTES_KEY)
             ]);
             
             const electivesSize = electives ? JSON.stringify(electives).length : 0;
             const notesSize = notes ? JSON.stringify(notes).length : 0;
-            const tasksSize = tasks ? JSON.stringify(tasks).length : 0;
             
             return {
-                used: electivesSize + notesSize + tasksSize,
+                used: electivesSize + notesSize,
                 total: 1024 * 1024, // 1MB limit for CloudStorage
                 electivesSize,
-                notesSize,
-                tasksSize
+                notesSize
             };
         } catch (error) {
             console.error('Error calculating storage:', error);
