@@ -101,7 +101,7 @@ function closeDayModal() {
     document.getElementById('dayModal').classList.remove('active');
 }
 
-// Save notes for classes - УЛУЧШЕННАЯ ФУНКЦИЯ
+// Save notes for classes - ОБНОВЛЕННАЯ ФУНКЦИЯ
 async function saveNotes() {
     const noteInputs = document.querySelectorAll('.note-input');
     const newNotes = {};
